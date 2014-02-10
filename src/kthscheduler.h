@@ -9,4 +9,4 @@ class KTHScheduler {
   private:
 };
 
-#endif // KTHSCUEDULER_H_
+#endif // KTHSCHEDULER_H_
