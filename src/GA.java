@@ -1,3 +1,5 @@
+import java.util.*;
+
 public class GA {
   // performs the GA
 
@@ -127,8 +129,8 @@ public class GA {
     for (StudentGroup sg : studentGroups) {
 
       // for each time
-      for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIME_SLOTS; 
-                                                           timeslot++) {
+      for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS; 
+                                                          timeslot++) {
         
         for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
           int numBookings = 0;
@@ -168,7 +170,7 @@ public class GA {
     for (Lecturer lecturer : lecturers) {
 
       // for each time
-      for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIME_SLOTS; 
+      for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS; 
                                                            timeslot++) {
         
         for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
@@ -203,14 +205,14 @@ public class GA {
   private int roomCapacityConstraint(TimeTable tt) {
     int numBreaches = 0;
     
-    RoomTimeTables[] rtts = tt.getRoomTimeTables();
+    RoomTimeTable[] rtts = tt.getRoomTimeTables();
 
     for (RoomTimeTable rtt : rtts) {
       int roomSize = rtt.getRoom().getCapacity();
       
       // for each time
       for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS;
-                                                          timeslots++) {
+                                                          timeslot++) {
         
         for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
           int eventID = rtt.getBookedEventID(timeslot, day);
@@ -235,14 +237,14 @@ public class GA {
   private int eventTypeRoomMismatch(TimeTable tt) {
     int numBreaches = 0;
     
-    RoomTimeTables rtts = tt.getRoomTimeTables();
+    RoomTimeTable[] rtts = tt.getRoomTimeTables();
 
     for (RoomTimeTable rtt : rtts) {
       Event.Type roomType = rtt.getRoom().getType(); 
       
       // for each time
       for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS;
-                                                          timeslots++) {
+                                                          timeslot++) {
         
         for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
           int eventID = rtt.getBookedEventID(timeslot, day);
@@ -250,7 +252,7 @@ public class GA {
           // only look at booked timeslots
           if (eventID != 0) {
             // TODO: find the type of the event booked here
-            Event.Type type = Event.LECTURE; // temp 
+            Event.Type type = Event.Type.LECTURE; // temp 
             if (roomType != type) {
               numBreaches++;
             }

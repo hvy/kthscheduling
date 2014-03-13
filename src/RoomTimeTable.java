@@ -1,7 +1,7 @@
 public class RoomTimeTable {
   
   public static final int NUM_DAYS = 5;
-  public static final int NUM_TIME_SLOTS = 4;
+  public static final int NUM_TIMESLOTS = 4;
 
 
   //matrix of timeslots
@@ -13,7 +13,7 @@ public class RoomTimeTable {
   private Room room;
 
   public RoomTimeTable() {
-    timeSlots = new int[NUM_TIME_SLOTS][NUM_DAYS];
+    timeSlots = new int[NUM_TIMESLOTS][NUM_DAYS];
   }
 
   public int getBookedEventID(int timeslot, int day) {
