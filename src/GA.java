@@ -30,8 +30,9 @@ public class GA {
   }
   
 
-  // =================
-  // Setup functions
+  //////////////////////////
+  // SETUP
+  //////////////////////////
 
   private Population createPopulation() {
 
@@ -45,8 +46,10 @@ public class GA {
   // TODO: do we need to check that the input data
   // is valid? maybe later?
 
-  // ================
-  // Genetic algorithm functions
+  //////////////////////////
+  // GENETIC ALGORITHMS
+  //////////////////////////
+
 
   private void cullPopulation(Population population) {
     // remove the baddies 
@@ -99,10 +102,22 @@ public class GA {
   private int coursesRequiredEvents(TimeTable tt) {
     return 0;
   }
+  
+  // TODO: will this be needed?
+  private int eventDoubleBooked(TimeTable tt) {
+    return 0;
+  }
 
   // num times a studentgroup is double booked
   private int studentGroupDoubleBooked(TimeTable tt) {
-    return 0;
+    int numBreaches = 0;
+  
+    RoomTimeTable[] rtts = tt.getRoomTimeTables();
+
+    // for each studentgroup
+      // for each 
+
+    return numBreaches;
   }
 
   // num times a lecturer is double booked
@@ -121,7 +136,7 @@ public class GA {
   }
 
   ///////////////////
-  // Hard constraints, each function returns the number of constraint breaches
+  // Soft constraints, each function returns the number of constraint breaches
   ///////////////////
   
   // TODO: how to represent the soft constraints?

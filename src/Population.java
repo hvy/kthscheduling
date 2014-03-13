@@ -14,4 +14,7 @@ public class Population {
     return individuals.get(0);
   }
 
+  public Iterator<TimeTable> iterator() {
+    return individuals.iterator();
+  }
 }

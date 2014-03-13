@@ -1,3 +1,5 @@
+import java.util.*;
+
 public class TimeTable {
   // the fitness of this individual, calculated by GA
   // TODO: store it here? needed?
@@ -12,5 +14,9 @@ public class TimeTable {
 
   public int getFitness() {
     return fitness;
+  }
+
+  public RoomTimeTable[] getRoomTimeTables() {
+    return roomTimeTables;
   }
 }
