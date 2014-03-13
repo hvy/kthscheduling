@@ -1,7 +1,7 @@
 public class Event {
 	
 	public static enum Type { LECTURE, LESSON, LAB };
-	private static int nextID = 0;
+	private static int nextID = 1;
 
 	private Type type;
 	private int id;

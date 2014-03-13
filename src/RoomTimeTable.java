@@ -1,12 +1,12 @@
 public class RoomTimeTable {
   
-  private final int NUM_DAYS = 5;
-  private final int NUM_TIME_SLOTS = 4;
+  public static final int NUM_DAYS = 5;
+  public static final int NUM_TIME_SLOTS = 4;
 
 
   //matrix of timeslots
   // with id of what class (or event?) is booked there
-
+  // rows are timeslots, columns are days
   private int[][] timeSlots;
 
   // Holds the constraints for this room
@@ -14,5 +14,13 @@ public class RoomTimeTable {
 
   public RoomTimeTable() {
     timeSlots = new int[NUM_TIME_SLOTS][NUM_DAYS];
+  }
+
+  public int getBookedEventID(int timeslot, int day) {
+    return timeSlots[timeslot][day];
+  }
+
+  public Room getRoom() {
+    return room;
   }
 }
