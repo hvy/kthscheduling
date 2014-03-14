@@ -1,5 +1,5 @@
 public class Event {
-	
+
 	public static enum Type { LECTURE, LESSON, LAB };
 	private static int nextID = 1;
 
@@ -29,5 +29,19 @@ public class Event {
 
 	public Type getType() {
 		return type;
+	}
+
+	public static Type generateType(int i) {
+		switch (i) {
+			case 0:
+				return Type.LECTURE;
+			case 1:
+				return Type.LESSON;
+			case 2:
+				return Type.LAB;
+			default:
+				break;
+		}
+		return null;
 	}
 }

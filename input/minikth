@@ -1,33 +1,33 @@
-#rooms
-d1 250 lec
-d2 100 lec
-d3 100 lec
-d34 40 cla 
-d35 40 cla
-d41 40 cla
-spelhallen 30 lab
-sporthallen 30 lab
-musiksalen 20 lab
-konsthallen 20 lab
-matsalen 30 lab
-e1 250 lec
-e34 30 cla
-e35 35 cla
-e36 45 cla
-gra 20 lab
-violett 25 lab
-#courses
-sf1625 envar 2 1 0
-sf1626 flervar 3 0 0 
-sf1604 linalg 3 0 0
-sf1901 sanstat 1 0 1
-dn1240 numme 1 1 1
-dd1361 progp 0 0 2
-is1500 dtek 1 0 1
-dd1339 inda 1 1 1
-dd1352 adk 3 2 1
-dd1361 mvk 1 1 0
-#lecturers
+# ROOMS
+d1 250 0
+d2 100 0
+d3 100 0
+d34 40 1
+d35 40 1
+d41 40 1
+spelhallen 30 2
+sporthallen 30 2
+musiksalen 20 2
+konsthallen 20 2
+matsalen 30 2
+e1 250 0
+e34 30 1
+e35 35 1
+e36 45 1
+gra 20 2
+violett 25 2
+# COURSES
+sf1625 2 1 0
+sf1626 3 0 0
+sf1604 3 0 0
+sf1901 1 0 1
+dn1240 1 1 1
+dd1361 0 0 2
+is1500 1 0 1
+dd1339 1 1 1
+dd1352 3 2 1
+dd1361 1 1 0
+# LECTURERS
 tommyekola sf1625
 karimdaho sf1625
 mattiasdahl sf1626
@@ -40,7 +40,7 @@ fredriklrlundevall is1500
 stefannilsson dd1339
 viggokann dd1352
 karlmeinke dd1361
-#studentgroups
+# STUDENTGROUPS
 cdate1 200 sf1625 sf1626 dd1339 sf1604
 cdate2 100 sf1901 dn1240 dd1361 is1500
 cdate3 70 dd1352 dd1361
