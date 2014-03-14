@@ -28,10 +28,25 @@ public class GA {
 
     while (population.getTopIndividual().getFitness() < DESIRED_FITNESS) {
       
+      // have small chance of keeping a bad one
+      // different chances for different intervals of fitness
       cullPopulation(population);
       breed(population);
+
+      // check whether java random is good enough
+
+      // save some of the good parent as well
       
       // output information?
+
+      // TODO: test fitness function time early
+
+      // TODO: make roomtimetable inner structure to a vector instead
+      // should make it faster
+
+      // TODO: optimize the check of double bookings by only iterating over 
+      // the roomtimetables only once,
+      // fast functions are important to GA, since they are slow
     }
 
     return population.getTopIndividual();
