@@ -6,13 +6,17 @@ public class Event {
 	private Type type;
 	private int id;
 	private int length;
+  private int size;
 	private Course course;
+  private StudentGroup studentGroup;
 
-	public Event(Type type, int length, Course course) {
+	public Event(Type type, int length, int size, Course course, StudentGroup sg) {
 		this.id = nextID++;
 		this.length = length;
+    this.size = size;
 		this.course = course;
 		this.type = type;
+    this.studentGroup = sg;
 	}
 
 	public int getId() {
@@ -23,6 +27,10 @@ public class Event {
 		return length;
 	}
 
+  public int getSize() {
+    return size();
+  }
+
 	public Course getCourse() {
 		return course;
 	}
@@ -30,4 +38,8 @@ public class Event {
 	public Type getType() {
 		return type;
 	}
+
+  public StudentGroup getStudentGroup() {
+    return studentGroup;
+  }
 }

@@ -47,6 +47,11 @@ public class GA {
       // TODO: optimize the check of double bookings by only iterating over 
       // the roomtimetables only once,
       // fast functions are important to GA, since they are slow
+
+      // TODO: a lab or class for a course should result in several events
+      // when checking if a studentgroup is double booked
+      // it should be allowed to have a studentgroup id double booked
+      // if the double bookings are class or lab
     }
 
     return population.getTopIndividual();
@@ -135,6 +140,7 @@ public class GA {
   }
 
   // num times a studentgroup is double booked
+  /*
   private int studentGroupDoubleBooked(TimeTable tt) {
     int numBreaches = 0;
   
@@ -167,6 +173,64 @@ public class GA {
             
             // add all extra bookings to the number of constraint breaches
             numBreaches += numBookings - 1;
+          }
+        }
+      }
+    }
+
+    return numBreaches;
+  }
+  */
+  // OPTIMIZE: just iterate over the rooms once instead?
+  private int studentGroupDoubleBookings(TimeTable tt) {
+    int numBreaches = 0;
+  
+    RoomTimeTable[] rtts = tt.getRoomTimeTables();
+    List<StudentGroup> studentGroups = kth.getStudentGroups();
+
+    for (StudentGroup sg : studentGroups) {
+      
+      // for each time
+      for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS; timeslot++) {
+        for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
+          int numDoubleBookings = 0;
+          
+          boolean evTypeSet = false;
+          Event.Type eventType;
+          for (RoomTimeTable rtt : rtts) {
+            int eventID = rtt.getBookedEventID(timeslot, day);
+
+            // 0 is unbooked
+            if (eventID != 0) {
+              Event event = kth.getEvent(eventID);
+              int sgID = event.getStudentGroup().getID();
+              
+              if (sgID == sg.getID()) {
+                
+                if (!evTypeSet) {
+                  // first one
+                  eventType = event.getType(); 
+                  evTypeSet = true;
+                
+                } else {
+                  if (eventType == Event.Type.LECTURE) {
+                    numDoubleBookings++;
+                  
+                  } else if (eventType != event.getType()) {
+                    numDoubleBookings++;
+                  
+                  } else {
+                    // labs and classes may be double booked
+                    // to account for the extra events created for each studentgroup
+                    // for each lesson/lab
+                  }
+                }
+              }
+            }
+          }
+
+          if (numDoubleBookings > 0) {
+            numBreaches += numDoubleBookings;
           }
         }
       }
@@ -234,9 +298,8 @@ public class GA {
           
           // only look at booked timeslots
           if (eventID != 0) {
-            // TODO: find the size of the studentgroup that this event
             // belongs to
-            int eventSize = 0; // temp
+            int eventSize = kth.getEvent(eventID).getSize();
             if (roomSize < eventSize) {
               numBreaches++;
             }
