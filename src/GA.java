@@ -10,10 +10,9 @@ public class GA {
   private final int DESIRED_FITNESS = 0;
 
   private KTH kth;
-  private HashMap<Integer, RoomTimeTable> timeTables;
 
   public GA() {
-    timeTables = new HashMap<Integer, RoomTimeTable>();
+    kth = new KTH();
   }
 
   /*
@@ -87,13 +86,19 @@ public class GA {
         String[] data = line.split(" ");
         if(data[0].charAt(0) == '#') {
           readingSection = data[1];
-          line = in.readLine();
+          data = in.readLine().split(" ");
         }
         if(readingSection.equals("ROOMS")) {
           roomName = data[0];
           int cap = Integer.parseInt(data[1]);
           Event.Type type = Event.generateType(Integer.parseInt(data[2]));
           Room room = new Room(roomName, cap, type);
+          // DEBUG
+          System.out.println("=== ROOM ===");
+          System.out.println("ID: " + room.getID());
+          System.out.println("Name:" + room.name());
+          System.out.println("");
+          //
           kth.addRoom(room);
         } else if(readingSection.equals("COURSES")) {
           courseName = data[0];
