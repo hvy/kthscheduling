@@ -3,8 +3,8 @@ public class RoomTimeTable {
   public static final int NUM_DAYS = 5;
   public static final int NUM_TIMESLOTS = 4;
 
-  //matrix of timeslots
-  // with id of what class (or event?) is booked there
+  // matrix of timeslots
+  // with id of what event that is bookes in each slot
   // rows are timeslots, columns are days
   private int[][] timeSlots;
 

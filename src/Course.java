@@ -22,6 +22,10 @@ public class Course {
 		this.numLabs = numLabs;
 	}
 
+  public String getId() {
+    return id;
+  }
+
 	public int getNumLectures() {
 		return numLectures;
 	}

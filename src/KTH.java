@@ -4,6 +4,7 @@ import java.util.*;
 * Represents all the persistent information from the input
 */
 public class KTH {
+
   // TODO: decide which of these are needed
   private static int nextRoomId = 0;
   private static int nextCourseId = 0;
@@ -27,7 +28,7 @@ public class KTH {
     events = new HashMap<Integer, Event>();
   }
 
-  public int addRoom(Room room) {;
+  public int addRoom(Room room) {
     rooms.put(nextRoomId, room);
     return nextRoomId++;
   }
@@ -80,7 +81,7 @@ public class KTH {
     for (StudentGroup sg : studentGroups.values()) {
       for (Course course : sg.getCourses()) {
         // create lecture events
-        for (int i = 0; i < course.numLectures(); i++) {
+        for (int i = 0; i < course.getNumLectures(); i++) {
           //Event event = new Event(Event.Type.LECTURE,
                                   //sg.getSize(),
 
@@ -89,21 +90,17 @@ public class KTH {
         }
 
         // create lesson events
-        for (int i = 0; i < course.numLessons(); i++) {
+        for (int i = 0; i < course.getNumLessons(); i++) {
           //int subeventsize = 
           //Event event = new Event(Event.Type.LESSON,
             //                      sg.get
         }
 
         // create lab events
-        for (int i = 0; i < course.numLabs(); i++) {
+        for (int i = 0; i < course.getNumLabs(); i++) {
 
         }
       }
     }
-  }
-
-  public Set<Event> getEvents() {
-
   }
 }

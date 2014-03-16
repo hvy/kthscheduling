@@ -10,6 +10,20 @@ public class Population {
     individuals = new ArrayList<TimeTable>();
   }
 
+  public void createRandomIndividuals(int numIndividuals, KTH kth) {
+    int numRooms = kth.getRooms().size();
+    int numCourses = kth.getCourses().size();
+    int numStudentGroups = kth.getStudentGroups().size();
+    int numLecturers = kth.getLecturers().size();
+    int numEvents = kth.getEvents().size();
+    for(int i = 0; i < numIndividuals; i++) {
+      TimeTable tt = new TimeTable(numRooms);
+      for(Event e : kth.getEvents().values()) {
+        // assign the event to a timeslot
+      }
+    }
+  }
+
   public TimeTable getTopIndividual() {
     return individuals.get(0);
   }
@@ -20,5 +34,9 @@ public class Population {
 
   public void sortIndividuals() {
     Collections.sort(individuals);
+  }
+
+  public int size() {
+    return individuals.size();
   }
 }
