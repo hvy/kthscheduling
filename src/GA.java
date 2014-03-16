@@ -233,11 +233,8 @@ public class GA {
     int numBreaches = 0;
   
     RoomTimeTable[] rtts = tt.getRoomTimeTables();
-    Collection<StudentGroup> studentGroups = kth.getStudentGroups().values();
-    Iterator<StudentGroup> studentGroupsIter = studentGroups.iterator();
     
-    while(studentGroupsIter.hasNext()) {
-      StudentGroup sg = studentGroupsIter.next();
+    while (StudentGroup sg : kth.getStudentGroups.values()) {
 
       // for each time
       for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS; timeslot++) {
@@ -296,11 +293,8 @@ public class GA {
     int numBreaches = 0;
 
     RoomTimeTable[] rtts = tt.getRoomTimeTables();
-    Collection<Lecturer> lecturers = kth.getLecturers().values();
-    Iterator<Lecturer> lecturersIter = lecturers.iterator();
 
-    while(lecturersIter.hasNext()) {
-      Lecturer lecturer = lecturersIter.next();
+    while (Lecturer lecturer : kth.getLecturers().values()) {
 
       // for each time
       for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS;

@@ -75,4 +75,35 @@ public class KTH {
   public Map<Integer, Event> getEvents() {
     return events;
   }
+
+  public void createEvents() {
+    for (StudentGroup sg : studentGroups.values()) {
+      for (Course course : sg.getCourses()) {
+        // create lecture events
+        for (int i = 0; i < course.numLectures(); i++) {
+          //Event event = new Event(Event.Type.LECTURE,
+                                  //sg.getSize(),
+
+                   // TODO: how do we choose a lecturer, randomly?
+                                  
+        }
+
+        // create lesson events
+        for (int i = 0; i < course.numLessons(); i++) {
+          //int subeventsize = 
+          //Event event = new Event(Event.Type.LESSON,
+            //                      sg.get
+        }
+
+        // create lab events
+        for (int i = 0; i < course.numLabs(); i++) {
+
+        }
+      }
+    }
+  }
+
+  public Set<Event> getEvents() {
+
+  }
 }
