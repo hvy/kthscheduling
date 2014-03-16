@@ -1,8 +1,7 @@
 import java.util.*;
 
-public class TimeTable {
-  // the fitness of this individual, calculated by GA
-  // TODO: store it here? needed?
+public class TimeTable implements Comparable<TimeTable> {
+  // TODO: change to double?
   private int fitness;
   
   // The timetables for each room
@@ -16,7 +15,23 @@ public class TimeTable {
     return fitness;
   }
 
+  public void setFitness(int fitness) {
+    this.fitness = fitness;
+  }
+
   public RoomTimeTable[] getRoomTimeTables() {
     return roomTimeTables;
+  }
+
+  @Override
+  public int compareTo(TimeTable other) {
+    int otherFitness = other.getFitness();
+
+    if (fitness < otherFitness)
+      return -1;
+    else if (fitness == otherFitness)
+      return 0;
+    else 
+      return 1;
   }
 }

@@ -17,4 +17,8 @@ public class Population {
   public Iterator<TimeTable> iterator() {
     return individuals.iterator();
   }
+
+  public void sortIndividuals() {
+    Collections.sort(individuals);
+  }
 }

@@ -1,7 +1,6 @@
 import java.util.*;
 
 public class GA {
-  // performs the GA
 
   private final int POPULATION_SIZE = 20; // TODO: test different sizes
   private final int DESIRED_FITNESS = 0;
@@ -83,7 +82,19 @@ public class GA {
 
 
   private void cullPopulation(Population population) {
-    // remove the baddies 
+    Iterator<TimeTable> it = population.iterator();
+
+    while (it.hasNext()) {
+      TimeTable tt = it.next();
+      fitness(tt);
+    }
+
+    // TODO: remove this and simply keep it sorted at all time
+    // for optimization
+    population.sortIndividuals();
+    
+
+
   }
 
   private void breed(Population population) {
@@ -110,11 +121,23 @@ public class GA {
   // A working schedule is then a schedule with positive fitness
   // A higher fitness is more desirable
   private void fitness(TimeTable tt) {
-    // TODO 
-    // set the fitness to this time table
-
     // call each of the constraints functions and (weight)
     // the scores together
+
+    int studentGroupDoubleBookings = studentGroupDoubleBookings(tt);
+    int lecturerDoubleBookings = lecturerDoubleBookings(tt);
+    int roomCapacityBreaches = roomCapacityBreaches(tt);
+    int roomTypeBreaches = roomTypeBreaches(tt);
+
+    int numBreaches = studentGroupDoubleBookings +
+                      lecturerDoubleBookings +
+                      roomCapacityBreaches + 
+                      roomTypeBreaches;
+
+    // temporary
+    // simply one minus point for each breach
+    int fitness = -1 * numBreaches;
+    tt.setFitness(fitness)
   }
 
   //////////////////////////
@@ -130,6 +153,7 @@ public class GA {
   // A room can not be double booked at a certain timeslot
 
   // TODO: better name please
+  // probably not needed
   private int coursesRequiredEvents(TimeTable tt) {
     return 0;
   }
@@ -140,47 +164,6 @@ public class GA {
   }
 
   // num times a studentgroup is double booked
-  /*
-  private int studentGroupDoubleBooked(TimeTable tt) {
-    int numBreaches = 0;
-  
-    RoomTimeTable[] rtts = tt.getRoomTimeTables();
-    List<StudentGroup> studentGroups = kth.getStudentGroups();
-    
-    for (StudentGroup sg : studentGroups) {
-
-      // for each time
-      for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS; 
-                                                          timeslot++) {
-        
-        for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
-          int numBookings = 0;
-
-          for (RoomTimeTable rtt : rtts) {
-            int eventID = rtt.getBookedEventID(timeslot, day);
-            
-            // 0 is unbooked
-            if (eventID != 0) {
-              // if the event that this eventID belongs to
-              // is an event that this studentgroup attends
-              // increment numBookings
-              // TODO
-            }
-          }
-          
-          // only one booking per time is allowed
-          if (numBookings > 1) {
-            
-            // add all extra bookings to the number of constraint breaches
-            numBreaches += numBookings - 1;
-          }
-        }
-      }
-    }
-
-    return numBreaches;
-  }
-  */
   // OPTIMIZE: just iterate over the rooms once instead?
   private int studentGroupDoubleBookings(TimeTable tt) {
     int numBreaches = 0;
@@ -240,7 +223,10 @@ public class GA {
   }
 
   // num times a lecturer is double booked
-  private int lecturerDoubleBooked(TimeTable tt) {
+  // NOTE: lecturers are only booked to lectures
+  // for the labs and classes, TAs are used and they are assumed to always
+  // be available
+  private int lecturerDoubleBookings(TimeTable tt) {
     int numBreaches = 0;
   
     RoomTimeTable[] rtts = tt.getRoomTimeTables();
@@ -260,10 +246,12 @@ public class GA {
             
             // 0 is unbooked
             if (eventID != 0) {
-              // if the event that this eventID belongs to
-              // is an event that this lecturer attends
-              // increment numBookings
-              // TODO
+              Event event = kth.getEvent(eventID);
+              // only check lectures since lecturers are only
+              // attached to lecture events
+              if (event.getType == Event.Type.LECTURE) {
+                numBookings++;
+              }
             }
           }
           
@@ -281,7 +269,7 @@ public class GA {
   }
 
   // num times a room is too small for the event booked
-  private int roomCapacityConstraint(TimeTable tt) {
+  private int roomCapacityBreaches(TimeTable tt) {
     int numBreaches = 0;
     
     RoomTimeTable[] rtts = tt.getRoomTimeTables();
@@ -298,7 +286,6 @@ public class GA {
           
           // only look at booked timeslots
           if (eventID != 0) {
-            // belongs to
             int eventSize = kth.getEvent(eventID).getSize();
             if (roomSize < eventSize) {
               numBreaches++;
@@ -312,7 +299,7 @@ public class GA {
   }
 
   // num times an event is booked to the wrong room type
-  private int eventTypeRoomMismatch(TimeTable tt) {
+  private int roomTypeBreaches(TimeTable tt) {
     int numBreaches = 0;
     
     RoomTimeTable[] rtts = tt.getRoomTimeTables();
@@ -330,7 +317,7 @@ public class GA {
           // only look at booked timeslots
           if (eventID != 0) {
             // TODO: find the type of the event booked here
-            Event.Type type = Event.Type.LECTURE; // temp 
+            Event.Type type = kth.getEvent(eventID).getType(); 
             if (roomType != type) {
               numBreaches++;
             }
