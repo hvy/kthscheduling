@@ -27,24 +27,6 @@ public class KTH {
     events = new HashMap<Integer, Event>();
   }
 
-  public void createEvents(StudentGroup studentGroup, Course course) {
-    int numLectures = course.getNumLectures();
-    int numLessons = course.getNumLessons();
-    int numLabs = course.getNumLabs();
-    for(int i = 0; i < numLectures; i++) {
-      Event lecture = new Event(Event.Type.LECTURE, 2, course);
-      addEvent(lecture);
-    }
-    for(int i = 0; i < numLessons; i++) {
-      Event lesson = new Event(Event.Type.LESSON, 2, course);
-      addEvent(lesson);
-    }
-    for(int i = 0; i < numLabs; i++) {
-      Event lab = new Event(Event.Type.LAB, 2, course);
-      addEvent(lab);
-    }
-  }
-
   public int addRoom(Room room) {;
     rooms.put(nextRoomId, room);
     return nextRoomId++;
@@ -84,6 +66,10 @@ public class KTH {
   public int addEvent(Event event) {
     events.put(nextEventId, event);
     return nextEventId++;
+  }
+
+  public Event getEvent(int id) {
+    return events.get(id);
   }
 
   public Map<Integer, Event> getEvents() {

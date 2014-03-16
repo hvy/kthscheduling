@@ -1,17 +1,18 @@
 import java.util.*;
 import java.io.*;
 
+/**
+ * Performs the Genetic Algorithm(GA) on the KTH data set.
+ */
 public class GA {
-  // performs the GA
-
-	private final String KTH_DATA = "input/minikth";
-  private final int POPULATION_SIZE = 20; // TODO: test different sizes
+  private final int MAX_POPULATION_SIZE = 20; // TODO: test different sizes
   private final int DESIRED_FITNESS = 0;
 
   private KTH kth;
+  private HashMap<Integer, RoomTimeTable> timeTables;
 
   public GA() {
-    kth = loadKthData();
+    timeTables = new HashMap<Integer, RoomTimeTable>();
   }
 
   /*
@@ -64,10 +65,9 @@ public class GA {
   // SETUP
   //////////////////////////
 
-  private KTH loadKthData() {
-    KTH kth = new KTH();
+  public KTH loadData(String dataFileUrl) {
     try {
-      File file = new File(KTH_DATA);
+      File file = new File(dataFileUrl);
       BufferedReader in = new BufferedReader(new FileReader(file));
       String line = null;
       // input data sections are read in the following order separated by #
@@ -88,47 +88,35 @@ public class GA {
           readingSection = data[1];
           line = in.readLine();
         }
-        switch(readingSection) {
-          case "ROOMS":
-            roomName = data[0];
-            int cap = Integer.parseInt(data[1]);
-            Event.Type type = Event.generateType(Integer.parseInt(data[2]));
-            Room room = new Room(roomName, cap, type);
-            kth.addRoom(room);
-            break;
-          case "COURSES":
-            courseName = data[0];
-            int numLectures = Integer.parseInt(data[1]);
-            int numLessons = Integer.parseInt(data[2]);
-            int numLabs = Integer.parseInt(data[3]);
-            Course course = new Course(courseName, numLectures, numLessons, numLabs);
-            courseId = kth.addCourse(course);
-            courseNameToId.put(courseName, courseId);
-            break;
-          case "LECTURERS":
-            lecturerName = data[0];
-            Lecturer lecturer = new Lecturer(lecturerName);
-            for(int i = 1; i < data.length; i++) {
-              // register all courses that this lecturer may teach
-              courseName = data[i];
-              courseId = courseNameToId.get(courseName);
-              lecturer.addCourse(kth.getCourses().get(courseId));
-            }
-            kth.addLecturer(lecturer);
-            break;
-          case "STUDENTGROUPS":
-            studentGroupName = data[0];
-            int size = Integer.parseInt(data[1]);
-            StudentGroup studentGroup = new StudentGroup(studentGroupName, size);
-            kth.addStudentGroup(studentGroup);
-            for(int i = 2; i < data.length; i++) {
-              courseName = data[i];
-              courseId = courseNameToId.get(courseName);
-              kth.createEvents(studentGroup, kth.getCourses().get(courseId));
-            }
-            break;
-          default:
-            break;
+        if(readingSection.equals("ROOMS")) {
+          roomName = data[0];
+          int cap = Integer.parseInt(data[1]);
+          Event.Type type = Event.generateType(Integer.parseInt(data[2]));
+          Room room = new Room(roomName, cap, type);
+          kth.addRoom(room);
+        } else if(readingSection.equals("COURSES")) {
+          courseName = data[0];
+          int numLectures = Integer.parseInt(data[1]);
+          int numLessons = Integer.parseInt(data[2]);
+          int numLabs = Integer.parseInt(data[3]);
+          Course course = new Course(courseName, numLectures, numLessons, numLabs);
+          courseId = kth.addCourse(course);
+          courseNameToId.put(courseName, courseId);
+        } else if(readingSection.equals("LECTURERS")) {
+          lecturerName = data[0];
+          Lecturer lecturer = new Lecturer(lecturerName);
+          for(int i = 1; i < data.length; i++) {
+            // register all courses that this lecturer may teach
+            courseName = data[i];
+            courseId = courseNameToId.get(courseName);
+            lecturer.addCourse(kth.getCourses().get(courseId));
+          }
+          kth.addLecturer(lecturer);
+        } else if(readingSection.equals("STUDENTGROUPS")) {
+          studentGroupName = data[0];
+          int size = Integer.parseInt(data[1]);
+          StudentGroup studentGroup = new StudentGroup(studentGroupName, size);
+          kth.addStudentGroup(studentGroup);
         }
       }
     } catch (FileNotFoundException e) {
@@ -264,26 +252,28 @@ public class GA {
     int numBreaches = 0;
   
     RoomTimeTable[] rtts = tt.getRoomTimeTables();
-    List<StudentGroup> studentGroups = kth.getStudentGroups();
+    Collection<StudentGroup> studentGroups = kth.getStudentGroups().values();
+    Iterator<StudentGroup> studentGroupsIter = studentGroups.iterator();
+    
+    while(studentGroupsIter.hasNext()) {
+      StudentGroup sg = studentGroupsIter.next();
 
-    for (StudentGroup sg : studentGroups) {
-      
       // for each time
       for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS; timeslot++) {
         for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
           int numDoubleBookings = 0;
           
           boolean evTypeSet = false;
-          Event.Type eventType;
+          Event.Type eventType = null;
           for (RoomTimeTable rtt : rtts) {
             int eventID = rtt.getBookedEventID(timeslot, day);
 
             // 0 is unbooked
             if (eventID != 0) {
               Event event = kth.getEvent(eventID);
-              int sgID = event.getStudentGroup().getID();
+              int sgID = event.getStudentGroup().getId();
               
-              if (sgID == sg.getID()) {
+              if (sgID == sg.getId()) {
                 
                 if (!evTypeSet) {
                   // first one
