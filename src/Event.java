@@ -1,34 +1,31 @@
 public class Event {
-	
+
 	public static enum Type { LECTURE, LESSON, LAB };
+
 	private static int nextID = 1;
+	
+  private final Type type;
+	private final int id;
+  private final int size;
+  private final Lecturer lecturer;
+	private final Course course;
+  private final StudentGroup studentGroup;
 
-	private Type type;
-	private int id;
-	private int length;
-  private int size;
-	private Course course;
-  private StudentGroup studentGroup;
-
-	public Event(Type type, int length, int size, Course course, StudentGroup sg) {
-		this.id = nextID++;
-		this.length = length;
+	public Event(Type t, int size, Lecturer l, Course c, StudentGroup s) {
+    this.id = nextID++;
+    this.type = t;
     this.size = size;
-		this.course = course;
-		this.type = type;
-    this.studentGroup = sg;
+    this.lecturer = l;
+		this.course = c;
+    this.studentGroup = s;
 	}
 
-	public int getId() {
+ 	public int getId() {
 		return id;
 	}
 
-	public int getLength() {
-		return length;
-	}
-
   public int getSize() {
-    return size();
+    return size;
   }
 
 	public Course getCourse() {
@@ -38,8 +35,22 @@ public class Event {
 	public Type getType() {
 		return type;
 	}
-
+  
   public StudentGroup getStudentGroup() {
     return studentGroup;
   }
+
+	public static Type generateType(int i) {
+		switch (i) {
+			case 0:
+				return Type.LECTURE;
+			case 1:
+				return Type.LESSON;
+			case 2:
+				return Type.LAB;
+			default:
+				break;
+		}
+		return null;
+	}
 }

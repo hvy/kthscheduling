@@ -5,59 +5,74 @@ import java.util.*;
 */
 public class KTH {
   // TODO: decide which of these are needed
-  private List<Room> rooms;
-  private List<Course> courses;
-  private List<StudentGroup> studentGroups;
-  private List<Lecturer> lecturers;
-  private List<Event> events;
+  private static int nextRoomId = 0;
+  private static int nextCourseId = 0;
+  private static int nextStudentGroupId = 0;
+  private static int nextLecturerId = 0;
+  private static int nextEventId = 0;
+
+  private Map<Integer, Room> rooms;
+  private Map<Integer, Course> courses;
+  private Map<Integer, StudentGroup> studentGroups;
+  private Map<Integer, Lecturer> lecturers;
+  private Map<Integer, Event> events;
 
   // TODO: add some maps over the IDs?
 
   public KTH() {
-    rooms = new ArrayList<Room>();
-    courses = new ArrayList<Course>();
-    studentGroups = new ArrayList<StudentGroup>();
-    lecturers = new ArrayList<Lecturer>();
-    events = new ArrayList<Event>();
+    rooms = new HashMap<Integer, Room>();
+    courses = new HashMap<Integer, Course>();
+    studentGroups = new HashMap<Integer, StudentGroup>();
+    lecturers = new HashMap<Integer, Lecturer>();
+    events = new HashMap<Integer, Event>();
   }
 
-  public void addRoom(Room room) {
-    rooms.add(room);
+  public int addRoom(Room room) {;
+    rooms.put(nextRoomId, room);
+    return nextRoomId++;
   }
 
-  public List<Room> getRooms() {
+  public Map<Integer, Room> getRooms() {
     return rooms;
   }
 
-  public void addCourse(Course course) {
-    courses.add(course);
+  public int addCourse(Course course) {
+    courses.put(nextCourseId, course);
+    return nextCourseId++;
   }
 
-  public List<Course> getCourses() {
+  public Map<Integer, Course> getCourses() {
     return courses;
   }
 
-  public void addStudentGroup(StudentGroup studentGroup) {
-    studentGroups.add(studentGroup);
+  public int addStudentGroup(StudentGroup studentGroup) {
+    studentGroups.put(nextStudentGroupId, studentGroup);
+    return nextStudentGroupId++;
   }
 
-  public List<StudentGroup> getStudentGroups() {
+  public Map<Integer, StudentGroup> getStudentGroups() {
     return studentGroups;
   }
 
-  public void addLecturer(Lecturer lecturer) {
-    lecturers.add(lecturer);
+  public int addLecturer(Lecturer lecturer) {
+    lecturers.put(nextLecturerId, lecturer);
+    return nextLecturerId++;
   }
 
-  public List<Lecturer> getLecturers() {
+  public Map<Integer, Lecturer> getLecturers() {
     return lecturers;
   }
 
-  public void addEvent(Event event) {
-    events.add(event);
+  public int addEvent(Event event) {
+    events.put(nextEventId, event);
+    return nextEventId++;
   }
 
-  public List<Event> getEvents() {
+  public Event getEvent(int id) {
+    return events.get(id);
+  }
+
+  public Map<Integer, Event> getEvents() {
     return events;
   }
 }
