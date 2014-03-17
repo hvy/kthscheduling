@@ -80,30 +80,58 @@ public class KTH {
     for (StudentGroup sg : studentGroups.values()) {
       for (Course course : sg.getCourses()) {
         // create lecture events
-        for (int i = 0; i < course.numLectures(); i++) {
+        for (int i = 0; i < course.getNumLectures(); i++) {
           //Event event = new Event(Event.Type.LECTURE,
                                   //sg.getSize(),
 
                    // TODO: how do we choose a lecturer, randomly?
                                   
         }
-
+        
+        // TODO: should maxsize of a subgroup be 40? to fit in the rooms
+        int lessonSize = 40;
+        
         // create lesson events
-        for (int i = 0; i < course.numLessons(); i++) {
-          //int subeventsize = 
-          //Event event = new Event(Event.Type.LESSON,
-            //                      sg.get
+        for (int i = 0; i < course.getNumLessons(); i++) {
+          int sgSize = sg.getSize();
+         
+          // create several events with a part of this studentgroup's
+          // size until their combined size is the same as
+          // the studentgroup's size
+          while (sgSize > 0) {
+            int evSize = sgSize > lessonSize ? lessonSize : sgSize;
+            Event event = new Event(Event.Type.LESSON,
+                                    evSize,
+                                    null, // should this be null or some default TA value?
+                                    course,
+                                    sg);
+
+            events.put(event.getID(), event);
+            sgSize = sgSize - evSize;
+
+          }
         }
+        
+        // TODO: is this size good?
+        int labSize = 25;
 
         // create lab events
-        for (int i = 0; i < course.numLabs(); i++) {
+        for (int i = 0; i < course.getNumLabs(); i++) {
+          int sgSize = sg.getSize();
 
+          while (sgSize > 0) {
+            int evSize = sgSize > labSize ? labSize : sgSize;
+            Event event = new Event(Event.Type.LAB,
+                                    evSize,
+                                    null,
+                                    course,
+                                    sg);
+
+            events.put(event.getID(), event);
+            sgSize = sgSize - evSize;
+          }
         }
       }
     }
-  }
-
-  public Set<Event> getEvents() {
-
   }
 }

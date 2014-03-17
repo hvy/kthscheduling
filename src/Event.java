@@ -20,7 +20,7 @@ public class Event {
     this.studentGroup = s;
 	}
 
- 	public int getId() {
+ 	public int getID() {
 		return id;
 	}
 

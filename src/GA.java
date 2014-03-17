@@ -234,7 +234,7 @@ public class GA {
   
     RoomTimeTable[] rtts = tt.getRoomTimeTables();
     
-    while (StudentGroup sg : kth.getStudentGroups.values()) {
+    for (StudentGroup sg : kth.getStudentGroups().values()) {
 
       // for each time
       for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS; timeslot++) {
@@ -294,7 +294,7 @@ public class GA {
 
     RoomTimeTable[] rtts = tt.getRoomTimeTables();
 
-    while (Lecturer lecturer : kth.getLecturers().values()) {
+    for (Lecturer lecturer : kth.getLecturers().values()) {
 
       // for each time
       for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS;
