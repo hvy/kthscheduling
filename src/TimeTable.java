@@ -6,7 +6,7 @@ public class TimeTable implements Comparable<TimeTable> {
   
   // The timetables for each room
   private RoomTimeTable[] roomTimeTables;
-  
+
   public TimeTable(int numRooms) {
     roomTimeTables = new RoomTimeTable[numRooms];
   }
@@ -23,6 +23,10 @@ public class TimeTable implements Comparable<TimeTable> {
     return roomTimeTables;
   }
 
+  public void putRoomTimeTable(int i, RoomTimeTable rtt) {
+    roomTimeTables[i] = rtt;  
+  }
+  
   @Override
   public int compareTo(TimeTable other) {
     int otherFitness = other.getFitness();

@@ -2,7 +2,7 @@ public class Event {
 
 	public static enum Type { LECTURE, LESSON, LAB };
 
-	private static int nextID = 1;
+	private static int nextId = 1;
 	
   private final Type type;
 	private final int id;
@@ -12,7 +12,7 @@ public class Event {
   private final StudentGroup studentGroup;
 
 	public Event(Type t, int size, Lecturer l, Course c, StudentGroup s) {
-    this.id = nextID++;
+    this.id = nextId++;
     this.type = t;
     this.size = size;
     this.lecturer = l;
@@ -20,7 +20,7 @@ public class Event {
     this.studentGroup = s;
 	}
 
- 	public int getID() {
+ 	public int getId() {
 		return id;
 	}
 

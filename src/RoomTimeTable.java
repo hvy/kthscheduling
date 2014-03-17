@@ -11,8 +11,21 @@ public class RoomTimeTable {
   // Holds the constraints for this room
   private Room room;
 
-  public RoomTimeTable() {
+  public RoomTimeTable(Room room) {
+    this.room = room;
     timeSlots = new int[NUM_TIMESLOTS][NUM_DAYS];
+  }
+
+  public boolean hasEvent(int day, int timeslot) {
+    if(timeSlots[timeslot][day] == 0) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  public void setEvent(int day, int timeslot, int eventId) {
+    timeSlots[timeslot][day] = eventId;
   }
 
   public int getBookedEventID(int timeslot, int day) {

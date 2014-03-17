@@ -12,15 +12,36 @@ public class Population {
 
   public void createRandomIndividuals(int numIndividuals, KTH kth) {
     int numRooms = kth.getRooms().size();
-    int numCourses = kth.getCourses().size();
-    int numStudentGroups = kth.getStudentGroups().size();
-    int numLecturers = kth.getLecturers().size();
-    int numEvents = kth.getEvents().size();
+    Map<Integer, Room> rooms = kth.getRooms();
     for(int i = 0; i < numIndividuals; i++) {
+      // create a time table
       TimeTable tt = new TimeTable(numRooms);
-      for(Event e : kth.getEvents().values()) {
-        // assign the event to a timeslot
+      // create a room timetable for each available room
+      for(int roomId : rooms.keySet()) {
+        Room r = rooms.get(roomId);
+        RoomTimeTable rtt = new RoomTimeTable(r);
+        tt.putRoomTimeTable(roomId, rtt);
       }
+      // assign all event to any timeslot
+      int rttId = 0;
+      int day = 0;
+      int timeSlot = 0;
+      RoomTimeTable rtt = tt.getRoomTimeTables()[rttId];
+      for(Event e : kth.getEvents().values()) {
+        if(rttId >= numRooms) {
+          System.out.println("ERROR: Too few rooms or too many events in the data set");
+          System.exit(1);
+        } else if(timeSlot == RoomTimeTable.NUM_TIMESLOTS) {
+          day++;
+          timeSlot = 0;
+        } else if(day == RoomTimeTable.NUM_DAYS) {
+          // room is now fully booked so we start to fill the next room with events
+          rtt = tt.getRoomTimeTables()[++rttId];
+        }
+        int eventId = e.getId();
+        rtt.setEvent(day, timeSlot, eventId);   
+      }
+      individuals.add(tt);
     }
   }
 

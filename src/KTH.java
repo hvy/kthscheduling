@@ -107,7 +107,7 @@ public class KTH {
                                     course,
                                     sg);
 
-            events.put(event.getID(), event);
+            events.put(event.getId(), event);
             sgSize = sgSize - evSize;
 
           }
@@ -128,7 +128,7 @@ public class KTH {
                                     course,
                                     sg);
 
-            events.put(event.getID(), event);
+            events.put(event.getId(), event);
             sgSize = sgSize - evSize;
           }
         }
