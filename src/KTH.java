@@ -80,13 +80,26 @@ public class KTH {
   public void createEvents() {
     for (StudentGroup sg : studentGroups.values()) {
       for (Course course : sg.getCourses()) {
+        
         // create lecture events
         for (int i = 0; i < course.getNumLectures(); i++) {
-          //Event event = new Event(Event.Type.LECTURE,
-                                  //sg.getSize(),
+          // find a lecturer for this course
+          // TODO: put lecturers on the course object instead?
+          List<Lecturer> possibleLecturers = new ArrayList<Lecturer>();
+          for (Lecturer lecturer : lecturers.values()) {
+            if (lecturer.canTeach(course)) {
+              possibleLecturers.add(lecturer);
+            }
+          }
 
-                   // TODO: how do we choose a lecturer, randomly?
-                                  
+          // temp, just take the first possible teacher
+          Event event = new Event(Event.Type.LECTURE,
+                                  sg.getSize(),
+                                  possibleLecturers.get(0),
+                                  course,
+                                  sg);
+
+          events.put(event.getId(), event);
         }
         
         // TODO: should maxsize of a subgroup be 40? to fit in the rooms

@@ -29,4 +29,13 @@ public class Lecturer {
 	public List<Course> getCourses() {
 		return courses;
 	}
+
+  public boolean canTeach(Course course) {
+    for (Course c : courses) {
+      if (c.getId().equals(course.getId()))
+        return true;
+    }
+
+    return false;
+  }
 }

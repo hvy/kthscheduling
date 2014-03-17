@@ -30,6 +30,10 @@ public class GA {
     // adjust for the number of soft constraints to be solved too
     // use another stop criteria too, in order to not run forever?
 
+    // temp, testing fitness
+    cullPopulation(population);
+
+
     while (population.getTopIndividual().getFitness() < DESIRED_FITNESS) {
 
       // have small chance of keeping a bad one
@@ -217,6 +221,7 @@ public class GA {
   // A working schedule is then a schedule with positive fitness
   // A higher fitness is more desirable
   private void fitness(TimeTable tt) {
+    long startTime = System.nanoTime();
     // TODO
     // set the fitness to this time table
 
@@ -233,7 +238,13 @@ public class GA {
     // temporary
     // simply one minus point for each breach
     int fitness = -1 * numBreaches;
+
+    long endTime = System.nanoTime();
+
     tt.setFitness(fitness);
+    
+    // temp
+    System.out.println("Fitness calculated in " + (endTime - startTime) + " ns");
   }
 
   //////////////////////////
