@@ -39,7 +39,11 @@ public class Population {
           rtt = tt.getRoomTimeTables()[++rttId];
         }
         int eventId = e.getId();
-        rtt.setEvent(day, timeSlot, eventId);   
+        System.out.println("==============");
+        System.out.println("ROOM TIME TABLE ID: " + rttId);
+        System.out.println("Day: " + day + " Timeslot: " + timeSlot + " Event ID: " + eventId);
+        rtt.setEvent(day, timeSlot, eventId);  
+        timeSlot++; 
       }
       individuals.add(tt);
     }
