@@ -4,6 +4,7 @@ import java.util.*;
 * Represents all the persistent information from the input
 */
 public class KTH {
+
   // TODO: decide which of these are needed
   private static int nextRoomId = 0;
   private static int nextCourseId = 0;
@@ -27,7 +28,7 @@ public class KTH {
     events = new HashMap<Integer, Event>();
   }
 
-  public int addRoom(Room room) {;
+  public int addRoom(Room room) {
     rooms.put(nextRoomId, room);
     return nextRoomId++;
   }

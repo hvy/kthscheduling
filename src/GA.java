@@ -5,24 +5,23 @@ import java.io.*;
  * Performs the Genetic Algorithm(GA) on the KTH data set.
  */
 public class GA {
-  private final int POPULATION_SIZE = 20; // TODO: test different sizes
   private final int MAX_POPULATION_SIZE = 20; // TODO: test different sizes
   private final int DESIRED_FITNESS = 0;
 
+  private Population population;
   private KTH kth;
-  private HashMap<Integer, RoomTimeTable> timeTables;
 
   public GA() {
-    timeTables = new HashMap<Integer, RoomTimeTable>();
+    kth = new KTH();
+    population = new Population();
   }
 
   /*
   * Returns a schedule based on the given constraints
-  * TODO: take the input file as parameter?
   */
   public TimeTable generateTimeTable() {
-    // setup everything first
-    Population population = createPopulation();
+    // create the initial randomized population
+   createPopulation();
 
     // run until the fitness is high enough
     // high enough should at least mean that
@@ -66,7 +65,7 @@ public class GA {
   // SETUP
   //////////////////////////
 
-  public KTH loadData(String dataFileUrl) {
+  public void loadData(String dataFileUrl) {
     try {
       File file = new File(dataFileUrl);
       BufferedReader in = new BufferedReader(new FileReader(file));
@@ -87,13 +86,20 @@ public class GA {
         String[] data = line.split(" ");
         if(data[0].charAt(0) == '#') {
           readingSection = data[1];
-          line = in.readLine();
+          data = in.readLine().split(" ");
         }
         if(readingSection.equals("ROOMS")) {
           roomName = data[0];
           int cap = Integer.parseInt(data[1]);
           Event.Type type = Event.generateType(Integer.parseInt(data[2]));
           Room room = new Room(roomName, cap, type);
+          // DEBUG
+          System.out.println("=== ROOM ===");
+          System.out.println("ID: " + room.getId());
+          System.out.println("Name: " + room.getName());
+          System.out.println("Capacity: " + room.getCapacity());
+          System.out.println("Type: " + room.getType());
+          //
           kth.addRoom(room);
         } else if(readingSection.equals("COURSES")) {
           courseName = data[0];
@@ -101,6 +107,13 @@ public class GA {
           int numLessons = Integer.parseInt(data[2]);
           int numLabs = Integer.parseInt(data[3]);
           Course course = new Course(courseName, numLectures, numLessons, numLabs);
+          // DEBUG
+          System.out.println("=== COURSE ===");
+          System.out.println("ID: " + course.getId());
+          System.out.println("#Lectures: " + course.getNumLectures());
+          System.out.println("#Lessons: " + course.getNumLessons());
+          System.out.println("#Labs: " + course.getNumLabs());
+          //
           courseId = kth.addCourse(course);
           courseNameToId.put(courseName, courseId);
         } else if(readingSection.equals("LECTURERS")) {
@@ -112,11 +125,28 @@ public class GA {
             courseId = courseNameToId.get(courseName);
             lecturer.addCourse(kth.getCourses().get(courseId));
           }
+          // DEBUG
+          System.out.println("=== LECTURER ===");
+          System.out.println("ID: " + lecturer.getId());
+          System.out.println("Name: " + lecturer.getName());
+          System.out.print("Courses: ");
+          List<Course> courses = lecturer.getCourses();
+          for(Course c : courses) {
+            System.out.print(c.getId() + " ");
+          }
+          System.out.println();
+          //
           kth.addLecturer(lecturer);
         } else if(readingSection.equals("STUDENTGROUPS")) {
           studentGroupName = data[0];
           int size = Integer.parseInt(data[1]);
           StudentGroup studentGroup = new StudentGroup(studentGroupName, size);
+          // DEBUG
+          System.out.println("=== STUDENT GROUP ===");
+          System.out.println("ID: " + studentGroup.getId());
+          System.out.println("Name: " + studentGroup.getName());
+          System.out.println("Number of students: " + studentGroup.getSize());
+          //
           kth.addStudentGroup(studentGroup);
         }
       }
@@ -125,16 +155,9 @@ public class GA {
     } catch (IOException e) {
       e.printStackTrace();
     }
-    return kth;
   }
 
-  private Population createPopulation() {
-    return null;
-  }
-
-  private void loadConstraints() {
-    // TODO change return val and parameters
-
+  public void loadConstraints(String constraintsFileUrl) {
     // read the input file and
     // add all data to the kth object
   }
@@ -145,7 +168,10 @@ public class GA {
   //////////////////////////
   // GENETIC ALGORITHMS
   //////////////////////////
-
+  
+  private void createPopulation() {
+    population.createRandomIndividuals(MAX_POPULATION_SIZE, kth);
+  }
 
   private void cullPopulation(Population population) {
     Iterator<TimeTable> it = population.iterator();
@@ -412,7 +438,6 @@ public class GA {
 
   // should schedules be "tightly" packed?
   private double unusedTimeSlots() {
-
     // räkna antal håltimmar?
     return 0.0;
   }
