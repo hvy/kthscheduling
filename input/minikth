@@ -18,14 +18,14 @@ gra 20 2
 violett 25 2
 # COURSES
 sf1625 2 1 0
-sf1626 3 0 0
-sf1604 3 0 0
+sf1626 2 0 0
+sf1604 1 0 0
 sf1901 1 0 1
 dn1240 1 1 1
 dd1361 0 0 2
 is1500 1 0 1
 dd1339 1 1 1
-dd1352 3 2 1
+dd1352 1 2 1
 dd1361 1 1 0
 # LECTURERS
 tommyekola sf1625
@@ -41,6 +41,6 @@ stefannilsson dd1339
 viggokann dd1352
 karlmeinke dd1361
 # STUDENTGROUPS
-cdate1 200 sf1625 sf1626 dd1339 sf1604
-cdate2 100 sf1901 dn1240 dd1361 is1500
+cdate1 200 sf1625 dd1339 sf1604
+cdate2 100 sf1901 dd1361 is1500
 cdate3 70 dd1352 dd1361
