@@ -21,7 +21,8 @@ public class GA {
   */
   public TimeTable generateTimeTable() {
     // create the initial randomized population
-   createPopulation();
+    kth.createEvents();
+    createPopulation();
 
     // run until the fitness is high enough
     // high enough should at least mean that
@@ -141,6 +142,11 @@ public class GA {
           studentGroupName = data[0];
           int size = Integer.parseInt(data[1]);
           StudentGroup studentGroup = new StudentGroup(studentGroupName, size);
+          for(int i = 2; i < data.length; i++) {
+            courseName = data[i];
+            courseId = courseNameToId.get(courseName);
+            studentGroup.addCourse(kth.getCourses().get(courseId));
+          }
           // DEBUG
           System.out.println("=== STUDENT GROUP ===");
           System.out.println("ID: " + studentGroup.getId());
