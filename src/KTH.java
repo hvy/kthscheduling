@@ -29,8 +29,8 @@ public class KTH {
   }
 
   public int addRoom(Room room) {
-    rooms.put(nextRoomId, room);
-    return nextRoomId++;
+    rooms.put(room.getId(), room);
+    return room.getId();
   }
 
   public Map<Integer, Room> getRooms() {
@@ -38,6 +38,7 @@ public class KTH {
   }
 
   public int addCourse(Course course) {
+    // TODO: use the course's own id here too?
     courses.put(nextCourseId, course);
     return nextCourseId++;
   }
@@ -47,8 +48,8 @@ public class KTH {
   }
 
   public int addStudentGroup(StudentGroup studentGroup) {
-    studentGroups.put(nextStudentGroupId, studentGroup);
-    return nextStudentGroupId++;
+    studentGroups.put(studentGroup.getId(), studentGroup);
+    return studentGroup.getId();
   }
 
   public Map<Integer, StudentGroup> getStudentGroups() {
@@ -56,18 +57,20 @@ public class KTH {
   }
 
   public int addLecturer(Lecturer lecturer) {
-    lecturers.put(nextLecturerId, lecturer);
-    return nextLecturerId++;
+    lecturers.put(lecturer.getId(), lecturer);
+    return lecturer.getId();
   }
 
   public Map<Integer, Lecturer> getLecturers() {
     return lecturers;
   }
-
+  
+  /* // not needed
   public int addEvent(Event event) {
-    events.put(nextEventId, event);
-    return nextEventId++;
+    events.put(event.getId(), event);
+    return event.getId();
   }
+  */
 
   public Event getEvent(int id) {
     return events.get(id);

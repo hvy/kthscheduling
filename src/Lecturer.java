@@ -2,7 +2,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class Lecturer {
-  private static int nextID = 1;
+  private static int nextID = 0;
 
   private String name;
   private int id;

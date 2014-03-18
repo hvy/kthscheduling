@@ -1,5 +1,5 @@
 public class Room {
-	private static int nextId = 1;
+	private static int nextId = 0;
   // store information about a room
   // num seats, equipment etc
 	private String name;

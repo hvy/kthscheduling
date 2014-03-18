@@ -89,10 +89,12 @@ public class GA {
       HashMap<String, Integer> courseNameToId = new HashMap<String, Integer>();
       while((line = in.readLine()) != null) {
         String[] data = line.split(" ");
+       
         if(data[0].charAt(0) == '#') {
           readingSection = data[1];
           data = in.readLine().split(" ");
         }
+
         if(readingSection.equals("ROOMS")) {
           roomName = data[0];
           int cap = Integer.parseInt(data[1]);
@@ -106,6 +108,7 @@ public class GA {
           System.out.println("Type: " + room.getType());
           //
           kth.addRoom(room);
+        
         } else if(readingSection.equals("COURSES")) {
           courseName = data[0];
           int numLectures = Integer.parseInt(data[1]);
@@ -121,15 +124,18 @@ public class GA {
           //
           courseId = kth.addCourse(course);
           courseNameToId.put(courseName, courseId);
+        
         } else if(readingSection.equals("LECTURERS")) {
           lecturerName = data[0];
           Lecturer lecturer = new Lecturer(lecturerName);
+          
           for(int i = 1; i < data.length; i++) {
             // register all courses that this lecturer may teach
             courseName = data[i];
             courseId = courseNameToId.get(courseName);
             lecturer.addCourse(kth.getCourses().get(courseId));
           }
+
           // DEBUG
           System.out.println("=== LECTURER ===");
           System.out.println("ID: " + lecturer.getId());
@@ -141,7 +147,9 @@ public class GA {
           }
           System.out.println();
           //
+
           kth.addLecturer(lecturer);
+        
         } else if(readingSection.equals("STUDENTGROUPS")) {
           studentGroupName = data[0];
           int size = Integer.parseInt(data[1]);
@@ -245,6 +253,7 @@ public class GA {
     
     // temp
     System.out.println("Fitness calculated in " + (endTime - startTime) + " ns");
+    System.out.println(fitness);
   }
 
   //////////////////////////
