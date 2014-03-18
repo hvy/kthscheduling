@@ -206,8 +206,15 @@ public class GA {
   }
 
   private void breed(Population population) {
-    // implement different crossover algorithms here
+    // implement different selection/crossover algorithms here
     // mutate according to mutation rate
+  }
+
+  // For each gene (booking in a timeslot), take with equal
+  // probability from either parent
+  private TimeTable crossover(TimeTable t1, TimeTable t2) {
+   
+    return null;
   }
 
   private void repairTimeTable(TimeTable tt) {
