@@ -4,10 +4,10 @@ public class Population {
   // keeps all the TimeTables for a generation
 
   // should be ordered when selecting the best individuals
-  private List<TimeTable> individuals;
+  private LinkedList<TimeTable> individuals;
 
   public Population() {
-    individuals = new ArrayList<TimeTable>();
+    individuals = new LinkedList<TimeTable>();
   }
 
   public void createRandomIndividuals(int numIndividuals, KTH kth) {
@@ -57,13 +57,32 @@ public class Population {
       individuals.add(tt);
     }
   }
-
+  
+  // assumes sorted
   public TimeTable getTopIndividual() {
     return individuals.get(0);
   }
 
-  public Iterator<TimeTable> iterator() {
-    return individuals.iterator();
+  public void addIndividual(TimeTable tt) {
+    individuals.add(tt);
+  }
+
+  public void addIndividualSorted(TimeTable tt) {
+    ListIterator<TimeTable> it = individuals.listIterator();
+    ListIterator<TimeTable> it2 = individuals.listIterator();
+
+    while (it.hasNext()) {
+      if (it.next().getFitness() < tt.getFitness()) {
+        it2.add(tt);
+        break;
+      }
+
+      it2.next();
+    } 
+  }
+
+  public ListIterator<TimeTable> listIterator() {
+    return individuals.listIterator();
   }
 
   public void sortIndividuals() {
