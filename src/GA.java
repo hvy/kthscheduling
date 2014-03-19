@@ -30,26 +30,20 @@ public class GA {
     // adjust for the number of soft constraints to be solved too
     // use another stop criteria too, in order to not run forever?
 
+    // initial sorting by fitness
     ListIterator<TimeTable> it = population.listIterator();
     while(it.hasNext()) {
       TimeTable tt = it.next();
       fitness(tt);
     }
-
-        // initial sorting
     population.sortIndividuals();
 
-    System.out.println("Best fitness: " + population.getTopIndividual().getFitness());
-    int iter = 0;
     while (population.getTopIndividual().getFitness() < DESIRED_FITNESS) {
       System.out.println("Best fitness: " + population.getTopIndividual().getFitness());
-      iter++;
-
 
       // have small chance of keeping a bad one
       // different chances for different intervals of fitness
       population = cullPopulation(population);
-      System.out.println("POP SIZE:" + population.size());
       breed(population);
 
       // check whether java random is good enough
@@ -71,8 +65,12 @@ public class GA {
       // when checking if a studentgroup is double booked
       // it should be allowed to have a studentgroup id double booked
       // if the double bookings are class or lab
+      TimeTable bestTimeTable = population.getTopIndividual();
+      for(RoomTimeTable rtt : bestTimeTable.getRoomTimeTables()) {
+        System.out.println("=============================================");
+        System.out.println(rtt);
+      }
     }
-    System.out.println("Iteration: " + iter);
     return population.getTopIndividual();
   }
 

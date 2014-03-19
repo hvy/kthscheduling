@@ -38,13 +38,11 @@ public class RoomTimeTable {
 
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append(room.getName() + "\n");
+    sb.append("Room: " + room.getName() + "\n");
     for (int timeslot = 0; timeslot < NUM_TIMESLOTS; timeslot++) {
       for (int day = 0; day < NUM_DAYS; day++) {
-        sb.append("DAY " + day + " at TS " + timeslot + " - " +
-                                          timeSlots[timeslot][day] + "\n");
+        sb.append("[\t" + timeSlots[timeslot][day] + "\t]");
       }
-
       sb.append("\n");
     }
 

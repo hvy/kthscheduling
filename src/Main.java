@@ -3,7 +3,7 @@ import java.io.*;
 
 public class Main {
   // URL to the university data file
-  private static final String UNIVERSITY_DATA_URL = "../input/minikth";
+  private static final String UNIVERSITY_DATA_URL = "../input/bigkth";
   private static final String UNIVERSITY_CONSTRAINTS_URL = "../input/constraints";
   private static final String OUTPUT_FILE_NAME_URL = "../timetable";
 
@@ -14,7 +14,7 @@ public class Main {
     TimeTable bestTimeTable = ga.generateTimeTable();
     writeToFile(bestTimeTable, OUTPUT_FILE_NAME_URL);
   }
-  
+
   /**
    * Write the best timetable to a file
    */
