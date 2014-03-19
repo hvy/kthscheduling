@@ -3,7 +3,7 @@ import java.util.*;
 public class TimeTable implements Comparable<TimeTable> {
   // TODO: change to double?
   private int fitness;
-  
+
   // The timetables for each room
   private RoomTimeTable[] roomTimeTables;
 
@@ -24,7 +24,7 @@ public class TimeTable implements Comparable<TimeTable> {
   }
 
   public void putRoomTimeTable(int i, RoomTimeTable rtt) {
-    roomTimeTables[i] = rtt;  
+    roomTimeTables[i] = rtt;
   }
 
   public String toString() {
@@ -36,16 +36,16 @@ public class TimeTable implements Comparable<TimeTable> {
 
     return sb.toString();
   }
-  
+
   @Override
   public int compareTo(TimeTable other) {
     int otherFitness = other.getFitness();
 
-    if (fitness < otherFitness)
+    if (fitness > otherFitness)
       return -1;
     else if (fitness == otherFitness)
       return 0;
-    else 
+    else
       return 1;
   }
 }

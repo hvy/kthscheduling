@@ -68,7 +68,7 @@ public class Population {
       availableTimeSlots.clear();
     }
   }
-  
+
   // assumes sorted
   public TimeTable getTopIndividual() {
     return individuals.get(0);
@@ -76,6 +76,10 @@ public class Population {
 
   public void addIndividual(TimeTable tt) {
     individuals.add(tt);
+  }
+
+  public TimeTable getIndividual(int i) {
+    return individuals.get(i);
   }
 
   public void addIndividualSorted(TimeTable tt) {
@@ -89,7 +93,7 @@ public class Population {
       }
 
       it2.next();
-    } 
+    }
   }
 
   public ListIterator<TimeTable> listIterator() {

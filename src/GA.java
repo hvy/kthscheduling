@@ -30,14 +30,14 @@ public class GA {
     // adjust for the number of soft constraints to be solved too
     // use another stop criteria too, in order to not run forever?
 
-    // initial sorting
-    population.sortIndividuals();
-
     ListIterator<TimeTable> it = population.listIterator();
     while(it.hasNext()) {
       TimeTable tt = it.next();
       fitness(tt);
     }
+
+        // initial sorting
+    population.sortIndividuals();
 
     System.out.println("Best fitness: " + population.getTopIndividual().getFitness());
     int iter = 0;
@@ -48,7 +48,8 @@ public class GA {
 
       // have small chance of keeping a bad one
       // different chances for different intervals of fitness
-      cullPopulation(population);
+      population = cullPopulation(population);
+      System.out.println("POP SIZE:" + population.size());
       breed(population);
 
       // check whether java random is good enough
@@ -202,7 +203,7 @@ public class GA {
 
   }
 
-  private void cullPopulation(Population population) {
+  private Population cullPopulation(Population population) {
     Population culledPopulation = new Population();
 
     ListIterator<TimeTable> it = population.listIterator();
@@ -214,7 +215,7 @@ public class GA {
     }
 
     // replace the population with the culled population
-    population = culledPopulation;
+    return culledPopulation;
   }
 
   // implement different selection/crossover algorithms here
@@ -222,10 +223,22 @@ public class GA {
   private void breed(Population population) {
     Random rand = new Random(System.currentTimeMillis());
 
+    List<Integer> parentIndices = new ArrayList<Integer>();
+    for (int i = 0; i < MAX_POPULATION_SIZE / 2; i++) {
+      parentIndices.add(i);
+    }
+
     // breed until the population is restored to its normal size
     while (population.size() < MAX_POPULATION_SIZE) {
       // pick two parents randomly among the population
+      Collections.shuffle(parentIndices);
+      int p1 = parentIndices.get(0);
+      int p2 = parentIndices.get(1);
+      TimeTable t1 = population.getIndividual(p1);
+      TimeTable t2 = population.getIndividual(p2);
 
+      TimeTable child = crossover(t1, t2);
+      population.addIndividual(child);
     }
 
     population.sortIndividuals();
@@ -266,6 +279,9 @@ public class GA {
     }
 
     repairTimeTable(child);
+
+    // calculate the fitness
+    fitness(child);
 
     return child;
   }
