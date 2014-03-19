@@ -38,7 +38,7 @@ public class GA {
     //System.out.println("CHILD");
     //System.out.println(child);
     fitness(child);
-    System.exit(0);
+    //System.exit(0);
 
     //
 
@@ -49,7 +49,7 @@ public class GA {
     // use another stop criteria too, in order to not run forever?
 
     // temp, testing fitness
-    cullPopulation(population);
+    //cullPopulation(population);
 
 
     while (population.getTopIndividual().getFitness() < DESIRED_FITNESS) {
