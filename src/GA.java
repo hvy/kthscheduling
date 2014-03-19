@@ -24,33 +24,14 @@ public class GA {
     kth.createEvents();
     createPopulation();
 
-    // temp
-    Iterator<TimeTable> it = population.iterator();
-    TimeTable t1 = it.next();
-    TimeTable t2 = it.next();
-    fitness(t1);
-    fitness(t2);
-    TimeTable child = crossover(t1, t2);
-    //System.out.println("T1");
-    //System.out.println(t1);
-    //System.out.println("T2");
-    //System.out.println(t2);
-    //System.out.println("CHILD");
-    //System.out.println(child);
-    fitness(child);
-    //System.exit(0);
-
-    //
-
     // run until the fitness is high enough
     // high enough should at least mean that
     // all hard constraints are solved
     // adjust for the number of soft constraints to be solved too
     // use another stop criteria too, in order to not run forever?
 
-    // temp, testing fitness
-    //cullPopulation(population);
-
+    // initial sorting
+    population.sortIndividuals();
 
     while (population.getTopIndividual().getFitness() < DESIRED_FITNESS) {
 
@@ -211,22 +192,32 @@ public class GA {
   }
 
   private void cullPopulation(Population population) {
-    Iterator<TimeTable> it = population.iterator();
+    Population culledPopulation = new Population();
 
-    while (it.hasNext()) {
-      TimeTable tt = it.next();
-      fitness(tt);
+    ListIterator<TimeTable> it = population.listIterator();
+
+    // take the top half of population
+    // assumes individuals are sorted
+    for (int i = 0; i < MAX_POPULATION_SIZE / 2; i++) {
+      culledPopulation.addIndividual(it.next());
     }
 
-    // TODO: remove this and simply keep it sorted at all time
-    // for optimization
-    population.sortIndividuals();
-
+    // replace the population with the culled population
+    population = culledPopulation;
   }
 
+  // implement different selection/crossover algorithms here
+  // mutate according to mutation rate
   private void breed(Population population) {
-    // implement different selection/crossover algorithms here
-    // mutate according to mutation rate
+    Random rand = new Random(System.currentTimeMillis());
+
+    // breed until the population is restored to its normal size
+    while (population.size() < MAX_POPULATION_SIZE) {
+      // pick two parents randomly among the population
+
+    }
+
+    population.sortIndividuals();
   }
 
   // For each gene (booking in a timeslot), take with equal
