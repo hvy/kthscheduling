@@ -7,6 +7,7 @@ import java.io.*;
 public class GA {
   private final int MAX_POPULATION_SIZE = 20; // TODO: test different sizes
   private final int DESIRED_FITNESS = 0;
+  private final int MUTATION_RATE = 10; // Compared with 1000
 
   private Population population;
   private KTH kth;
@@ -39,19 +40,24 @@ public class GA {
         // initial sorting
     population.sortIndividuals();
 
-    System.out.println("Best fitness: " + population.getTopIndividual().getFitness());
+    System.out.println("Best fitness: " + 
+                          population.getTopIndividual().getFitness());
+
     int iter = 0;
     while (population.getTopIndividual().getFitness() < DESIRED_FITNESS) {
-      System.out.println("Best fitness: " + population.getTopIndividual().getFitness());
+      System.out.println("Best fitness: " + 
+                           population.getTopIndividual().getFitness());
       iter++;
 
 
-      // have small chance of keeping a bad one
-      // different chances for different intervals of fitness
       population = cullPopulation(population);
       System.out.println("POP SIZE:" + population.size());
       breed(population);
 
+      // TODO //////////////
+      // have small chance of keeping a bad one
+      // different chances for different intervals of fitness
+      
       // check whether java random is good enough
 
       // save some of the good parent as well
@@ -71,7 +77,9 @@ public class GA {
       // when checking if a studentgroup is double booked
       // it should be allowed to have a studentgroup id double booked
       // if the double bookings are class or lab
+      ///////////////////////
     }
+
     System.out.println("Iteration: " + iter);
     return population.getTopIndividual();
   }
@@ -238,6 +246,9 @@ public class GA {
       TimeTable t2 = population.getIndividual(p2);
 
       TimeTable child = crossover(t1, t2);
+      mutate(child);
+      fitness(child);
+      
       population.addIndividual(child);
     }
 
@@ -280,9 +291,6 @@ public class GA {
 
     repairTimeTable(child);
 
-    // calculate the fitness
-    fitness(child);
-
     return child;
   }
 
@@ -296,8 +304,28 @@ public class GA {
     // TODO
   }
 
+  // Fixed mutation rate right now meaning each 
+  // individual is mutated slightly
   private void mutate(TimeTable tt) {
-    // TODO
+    Random rand = new Random(System.currentTimeMillis());
+
+    RoomTimeTable[] rtts = tt.getRoomTimeTables();
+
+    for (int i = 0; i < kth.getNumRooms(); i++) {
+      RoomTimeTable rtt = new RoomTimeTable(rtts[i].getRoom());
+
+      // for each available time
+      for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS; 
+                                                            timeslot++) {
+        for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
+          if (rand.nextInt(1000) < MUTATION_RATE) {
+            // mutate this gene
+            int allele = kth.getRandomEventId(rand);
+            rtt.setEvent(day, timeslot, allele);
+          }
+        }
+      }
+    }
   }
 
   // Idea for fitness:
