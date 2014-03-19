@@ -67,6 +67,10 @@ public class Population {
     individuals.add(tt);
   }
 
+  public TimeTable getIndividual(int i) {
+    return individuals.get(i);
+  } 
+
   public void addIndividualSorted(TimeTable tt) {
     ListIterator<TimeTable> it = individuals.listIterator();
     ListIterator<TimeTable> it2 = individuals.listIterator();

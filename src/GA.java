@@ -210,11 +210,23 @@ public class GA {
   // mutate according to mutation rate
   private void breed(Population population) {
     Random rand = new Random(System.currentTimeMillis());
+    
+    List<Integer> parentIndices = new ArrayList<Integer>();
+    for (int i = 0; i < MAX_POPULATION_SIZE / 2; i++) {
+      parentIndices.add(i);
+    }
 
     // breed until the population is restored to its normal size
     while (population.size() < MAX_POPULATION_SIZE) {
       // pick two parents randomly among the population
-      
+      Collections.shuffle(parentIndices);
+      int p1 = parentIndices.get(0);
+      int p2 = parentIndices.get(1);
+      TimeTable t1 = population.getIndividual(p1);
+      TimeTable t2 = population.getIndividual(p2);
+
+      TimeTable child = crossover(t1, t2);
+      population.addIndividual(child);
     }
 
     population.sortIndividuals();
@@ -255,6 +267,9 @@ public class GA {
     } 
      
     repairTimeTable(child);
+
+    // calculate the fitness
+    fitness(child);
 
     return child;
   }
