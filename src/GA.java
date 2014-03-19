@@ -24,6 +24,24 @@ public class GA {
     kth.createEvents();
     createPopulation();
 
+    // temp
+    Iterator<TimeTable> it = population.iterator();
+    TimeTable t1 = it.next();
+    TimeTable t2 = it.next();
+    fitness(t1);
+    fitness(t2);
+    TimeTable child = crossover(t1, t2);
+    System.out.println("T1");
+    System.out.println(t1);
+    System.out.println("T2");
+    System.out.println(t2);
+    System.out.println("CHILD");
+    System.out.println(child);
+    fitness(child);
+    System.exit(0);
+
+    //
+
     // run until the fitness is high enough
     // high enough should at least mean that
     // all hard constraints are solved
@@ -189,6 +207,7 @@ public class GA {
   
   private void createPopulation() {
     population.createRandomIndividuals(MAX_POPULATION_SIZE, kth);
+
   }
 
   private void cullPopulation(Population population) {
@@ -213,7 +232,45 @@ public class GA {
   // For each gene (booking in a timeslot), take with equal
   // probability from either parent
   private TimeTable crossover(TimeTable t1, TimeTable t2) {
-   
+    TimeTable child = new TimeTable(kth.getNumRooms());
+
+    RoomTimeTable[] rtts1 = t1.getRoomTimeTables();
+    RoomTimeTable[] rtts2 = t2.getRoomTimeTables();
+
+    Random rand = new Random(System.currentTimeMillis());
+    
+    // for every roomtimetable
+    for (int i = 0; i < kth.getNumRooms(); i++) {
+      RoomTimeTable rtt = new RoomTimeTable(rtts1[i].getRoom());
+      
+      // for each available time
+      for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS; timeslot++) {
+        for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
+          int allele;
+          if (rand.nextBoolean()) {
+            // take from parent 1
+            allele = rtts1[i].getEvent(day, timeslot); 
+          
+          } else {
+            // take from parent 2
+            allele = rtts2[i].getEvent(day, timeslot);
+          }
+
+          rtt.setEvent(day, timeslot, allele);
+        }
+      }
+
+      child.putRoomTimeTable(i, rtt);
+    } 
+     
+    repairTimeTable(child);
+
+    return child;
+  }
+
+  private TimeTable crossoverWithPoints(TimeTable t1, TimeTable t2,
+                                                      int numPoints) {
+    
     return null;
   }
 
@@ -303,7 +360,7 @@ public class GA {
           boolean evTypeSet = false;
           Event.Type eventType = null;
           for (RoomTimeTable rtt : rtts) {
-            int eventID = rtt.getBookedEventID(timeslot, day);
+            int eventID = rtt.getEvent(day, timeslot);
 
             // 0 is unbooked
             if (eventID != 0) {
@@ -363,7 +420,7 @@ public class GA {
           int numBookings = 0;
 
           for (RoomTimeTable rtt : rtts) {
-            int eventID = rtt.getBookedEventID(timeslot, day);
+            int eventID = rtt.getEvent(day, timeslot);
 
             // 0 is unbooked
             if (eventID != 0) {
@@ -403,7 +460,7 @@ public class GA {
                                                           timeslot++) {
 
         for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
-          int eventID = rtt.getBookedEventID(timeslot, day);
+          int eventID = rtt.getEvent(day, timeslot);
 
           // only look at booked timeslots
           if (eventID != 0) {
@@ -433,7 +490,7 @@ public class GA {
                                                           timeslot++) {
 
         for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
-          int eventID = rtt.getBookedEventID(timeslot, day);
+          int eventID = rtt.getEvent(day, timeslot);
 
           // only look at booked timeslots
           if (eventID != 0) {

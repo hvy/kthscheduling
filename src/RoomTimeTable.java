@@ -23,16 +23,31 @@ public class RoomTimeTable {
       return true;
     }
   }
+  
+  public int getEvent(int day, int timeslot) {
+    return timeSlots[timeslot][day];
+  }
 
   public void setEvent(int day, int timeslot, int eventId) {
     timeSlots[timeslot][day] = eventId;
   }
 
-  public int getBookedEventID(int timeslot, int day) {
-    return timeSlots[timeslot][day];
-  }
-
   public Room getRoom() {
     return room;
+  }
+
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append(room.getName() + "\n");
+    for (int timeslot = 0; timeslot < NUM_TIMESLOTS; timeslot++) {
+      for (int day = 0; day < NUM_DAYS; day++) {
+        sb.append("DAY " + day + " at TS " + timeslot + " - " + 
+                                          timeSlots[timeslot][day] + "\n"); 
+      }
+
+      sb.append("\n");
+    }
+    
+    return sb.toString();
   }
 }

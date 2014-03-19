@@ -26,6 +26,16 @@ public class TimeTable implements Comparable<TimeTable> {
   public void putRoomTimeTable(int i, RoomTimeTable rtt) {
     roomTimeTables[i] = rtt;  
   }
+
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    for (RoomTimeTable rtt : roomTimeTables) {
+      sb.append(rtt.toString());
+      sb.append("==============\n");
+    }
+
+    return sb.toString();
+  }
   
   @Override
   public int compareTo(TimeTable other) {

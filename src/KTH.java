@@ -37,6 +37,10 @@ public class KTH {
     return rooms;
   }
 
+  public int getNumRooms() {
+    return rooms.size();
+  }
+
   public int addCourse(Course course) {
     // TODO: use the course's own id here too?
     courses.put(nextCourseId, course);
