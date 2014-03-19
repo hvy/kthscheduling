@@ -33,7 +33,18 @@ public class GA {
     // initial sorting
     population.sortIndividuals();
 
+    ListIterator<TimeTable> it = population.listIterator();
+    while(it.hasNext()) {
+      TimeTable tt = it.next();
+      fitness(tt);
+    }
+
+    System.out.println("Best fitness: " + population.getTopIndividual().getFitness());
+    int iter = 0;
     while (population.getTopIndividual().getFitness() < DESIRED_FITNESS) {
+      System.out.println("Best fitness: " + population.getTopIndividual().getFitness());
+      iter++;
+
 
       // have small chance of keeping a bad one
       // different chances for different intervals of fitness
@@ -60,7 +71,7 @@ public class GA {
       // it should be allowed to have a studentgroup id double booked
       // if the double bookings are class or lab
     }
-
+    System.out.println("Iteration: " + iter);
     return population.getTopIndividual();
   }
 
