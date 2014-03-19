@@ -1,5 +1,5 @@
 public class RoomTimeTable {
-  
+
   public static final int NUM_DAYS = 5;
   public static final int NUM_TIMESLOTS = 4;
 
@@ -23,7 +23,7 @@ public class RoomTimeTable {
       return true;
     }
   }
-  
+
   public int getEvent(int day, int timeslot) {
     return timeSlots[timeslot][day];
   }
@@ -41,13 +41,13 @@ public class RoomTimeTable {
     sb.append(room.getName() + "\n");
     for (int timeslot = 0; timeslot < NUM_TIMESLOTS; timeslot++) {
       for (int day = 0; day < NUM_DAYS; day++) {
-        sb.append("DAY " + day + " at TS " + timeslot + " - " + 
-                                          timeSlots[timeslot][day] + "\n"); 
+        sb.append("DAY " + day + " at TS " + timeslot + " - " +
+                                          timeSlots[timeslot][day] + "\n");
       }
 
       sb.append("\n");
     }
-    
+
     return sb.toString();
   }
 }

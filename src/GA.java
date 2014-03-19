@@ -31,12 +31,12 @@ public class GA {
     fitness(t1);
     fitness(t2);
     TimeTable child = crossover(t1, t2);
-    System.out.println("T1");
-    System.out.println(t1);
-    System.out.println("T2");
-    System.out.println(t2);
-    System.out.println("CHILD");
-    System.out.println(child);
+    //System.out.println("T1");
+    //System.out.println(t1);
+    //System.out.println("T2");
+    //System.out.println(t2);
+    //System.out.println("CHILD");
+    //System.out.println(child);
     fitness(child);
     System.exit(0);
 
@@ -107,7 +107,7 @@ public class GA {
       HashMap<String, Integer> courseNameToId = new HashMap<String, Integer>();
       while((line = in.readLine()) != null) {
         String[] data = line.split(" ");
-       
+
         if(data[0].charAt(0) == '#') {
           readingSection = data[1];
           data = in.readLine().split(" ");
@@ -126,7 +126,7 @@ public class GA {
           System.out.println("Type: " + room.getType());
           //
           kth.addRoom(room);
-        
+
         } else if(readingSection.equals("COURSES")) {
           courseName = data[0];
           int numLectures = Integer.parseInt(data[1]);
@@ -139,14 +139,14 @@ public class GA {
           System.out.println("#Lectures: " + course.getNumLectures());
           System.out.println("#Lessons: " + course.getNumLessons());
           System.out.println("#Labs: " + course.getNumLabs());
-          //
+          // END_DEBUG
           courseId = kth.addCourse(course);
           courseNameToId.put(courseName, courseId);
-        
+
         } else if(readingSection.equals("LECTURERS")) {
           lecturerName = data[0];
           Lecturer lecturer = new Lecturer(lecturerName);
-          
+
           for(int i = 1; i < data.length; i++) {
             // register all courses that this lecturer may teach
             courseName = data[i];
@@ -164,10 +164,10 @@ public class GA {
             System.out.print(c.getId() + " ");
           }
           System.out.println();
-          //
+          // END_DEBUG
 
           kth.addLecturer(lecturer);
-        
+
         } else if(readingSection.equals("STUDENTGROUPS")) {
           studentGroupName = data[0];
           int size = Integer.parseInt(data[1]);
@@ -204,7 +204,7 @@ public class GA {
   //////////////////////////
   // GENETIC ALGORITHMS
   //////////////////////////
-  
+
   private void createPopulation() {
     population.createRandomIndividuals(MAX_POPULATION_SIZE, kth);
 
@@ -221,7 +221,7 @@ public class GA {
     // TODO: remove this and simply keep it sorted at all time
     // for optimization
     population.sortIndividuals();
-    
+
   }
 
   private void breed(Population population) {
@@ -238,19 +238,19 @@ public class GA {
     RoomTimeTable[] rtts2 = t2.getRoomTimeTables();
 
     Random rand = new Random(System.currentTimeMillis());
-    
+
     // for every roomtimetable
     for (int i = 0; i < kth.getNumRooms(); i++) {
       RoomTimeTable rtt = new RoomTimeTable(rtts1[i].getRoom());
-      
+
       // for each available time
       for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS; timeslot++) {
         for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
           int allele;
           if (rand.nextBoolean()) {
             // take from parent 1
-            allele = rtts1[i].getEvent(day, timeslot); 
-          
+            allele = rtts1[i].getEvent(day, timeslot);
+
           } else {
             // take from parent 2
             allele = rtts2[i].getEvent(day, timeslot);
@@ -261,8 +261,8 @@ public class GA {
       }
 
       child.putRoomTimeTable(i, rtt);
-    } 
-     
+    }
+
     repairTimeTable(child);
 
     return child;
@@ -270,7 +270,7 @@ public class GA {
 
   private TimeTable crossoverWithPoints(TimeTable t1, TimeTable t2,
                                                       int numPoints) {
-    
+
     return null;
   }
 
@@ -304,7 +304,7 @@ public class GA {
 
     int numBreaches = studentGroupDoubleBookings +
                       lecturerDoubleBookings +
-                      roomCapacityBreaches + 
+                      roomCapacityBreaches +
                       roomTypeBreaches;
 
     // temporary
@@ -314,7 +314,7 @@ public class GA {
     long endTime = System.nanoTime();
 
     tt.setFitness(fitness);
-    
+
     // temp
     System.out.println("Fitness calculated in " + (endTime - startTime) + " ns");
     System.out.println(fitness);
@@ -347,16 +347,16 @@ public class GA {
   // OPTIMIZE: just iterate over the rooms once instead?
   private int studentGroupDoubleBookings(TimeTable tt) {
     int numBreaches = 0;
-  
+
     RoomTimeTable[] rtts = tt.getRoomTimeTables();
-    
+
     for (StudentGroup sg : kth.getStudentGroups().values()) {
 
       // for each time
       for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS; timeslot++) {
         for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
           int numDoubleBookings = 0;
-          
+
           boolean evTypeSet = false;
           Event.Type eventType = null;
           for (RoomTimeTable rtt : rtts) {
@@ -366,21 +366,21 @@ public class GA {
             if (eventID != 0) {
               Event event = kth.getEvent(eventID);
               int sgID = event.getStudentGroup().getId();
-              
+
               if (sgID == sg.getId()) {
-                
+
                 if (!evTypeSet) {
                   // first one
-                  eventType = event.getType(); 
+                  eventType = event.getType();
                   evTypeSet = true;
-                
+
                 } else {
                   if (eventType == Event.Type.LECTURE) {
                     numDoubleBookings++;
-                  
+
                   } else if (eventType != event.getType()) {
                     numDoubleBookings++;
-                  
+
                   } else {
                     // labs and classes may be double booked
                     // to account for the extra events created for each studentgroup
@@ -495,7 +495,7 @@ public class GA {
           // only look at booked timeslots
           if (eventID != 0) {
             // TODO: find the type of the event booked here
-            Event.Type type = kth.getEvent(eventID).getType(); 
+            Event.Type type = kth.getEvent(eventID).getType();
             if (roomType != type) {
               numBreaches++;
             }
