@@ -408,7 +408,6 @@ public class GA {
 
     for (int i = 0; i < kth.getNumRooms(); i++) {
       RoomTimeTable rtt = new RoomTimeTable(rtts[i].getRoom());
-
       // for each available time
       for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS;
                                                             timeslot++) {
@@ -417,8 +416,10 @@ public class GA {
             // mutate this gene
             int swapTargetDay = rand.nextInt(RoomTimeTable.NUM_DAYS);
             int swapTargetTimeslot = rand.nextInt(RoomTimeTable.NUM_TIMESLOTS); 
-            int allele = kth.getRandomEventId(rand);
-            rtt.setEvent(day, timeslot, allele);
+            int swapTargetEventId = rtt.getEvent(swapTargetDay, swapTargetTimeslot);
+            int swapSrcEventId = rtt.getEvent(day, timeslot);
+            rtt.setEvent(swapTargetDay, swapTargetTimeslot, swapSrcEventId);
+            rtt.setEvent(day, timeslot, swapTargetEventId);
           }
         }
       }
