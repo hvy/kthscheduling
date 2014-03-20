@@ -34,13 +34,12 @@ public class GA {
     // adjust for the number of soft constraints to be solved too
     // use another stop criteria too, in order to not run forever?
 
-    // initial sorting by fitness
     ListIterator<TimeTable> it = population.listIterator();
     while(it.hasNext()) {
       TimeTable tt = it.next();
       fitness(tt);
     }
-    population.sortIndividuals();
+    population.sortIndividuals(); // sort first generation by fitness
 
     while (population.getTopIndividual().getFitness() < DESIRED_FITNESS) {
       System.out.println("Best fitness: " + population.getTopIndividual().getFitness());
@@ -378,8 +377,10 @@ public class GA {
     }
   }
 
-  // Fixed mutation rate right now meaning each
-  // individual is mutated slightly
+  //////////////////////////
+  // MUTATION
+  //////////////////////////
+  
   private void mutate(TimeTable tt) {
     //mutateRandomGene(tt);
     mutateSwapGene(tt);
@@ -430,21 +431,19 @@ public class GA {
     }
   } 
 
+  //////////////////////////
+  // FITNESS
+  //////////////////////////
+
   // Idea for fitness:
   // Each of the softconstraints met should give a positive value
-
   // Each of the hard constraints that are not met should give a negative value
-
   // Each hard constraints negative contribution should be higher than the
   // highest possible sum of the positive contributions of the soft constraints
-
   // A working schedule is then a schedule with positive fitness
   // A higher fitness is more desirable
   private void fitness(TimeTable tt) {
-    long startTime = System.nanoTime();
-    // TODO
     // set the fitness to this time table
-
     int studentGroupDoubleBookings = studentGroupDoubleBookings(tt);
     int lecturerDoubleBookings = lecturerDoubleBookings(tt);
     int roomCapacityBreaches = roomCapacityBreaches(tt);
@@ -455,24 +454,9 @@ public class GA {
                       roomCapacityBreaches +
                       roomTypeBreaches;
 
-    // temporary
-    // simply one minus point for each breach
+    // TODO weight the different constraints breaches
     int fitness = -1 * numBreaches;
-
-    long endTime = System.nanoTime();
-
     tt.setFitness(fitness);
-
-    //System.out.println("==============================");
-    //System.out.println("studentGroupDoubleBookings: " + studentGroupDoubleBookings);
-    //System.out.println("lecturerDoubleBookings: " + lecturerDoubleBookings);
-    //System.out.println("roomCapacityBreaches: " + roomCapacityBreaches);
-    //System.out.println("roomTypeBreaches: " + roomTypeBreaches);
-
-    
-    // temp
-    //System.out.println("Fitness calculated in " + (endTime - startTime) + " ns");
-    //System.out.println(fitness);
   }
 
   //////////////////////////
