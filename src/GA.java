@@ -7,7 +7,7 @@ import java.io.*;
 public class GA {
   private final int DESIRED_FITNESS = 0;
   private final int MAX_POPULATION_SIZE = 1000; // TODO: test different sizes
-  private final int CULLED_POPULATION_SIZE = 150;
+  private final int CULLED_POPULATION_SIZE = 10;
   private final int CROSSOVER_GENERATION_SIZE = 50;  
   private final int MUTATION_RATE = 50; // Compared with 1000
 
@@ -244,7 +244,8 @@ public class GA {
       TimeTable t1 = population.getIndividual(p1);
       TimeTable t2 = population.getIndividual(p2);
       TimeTable child = crossover(t1, t2);
-      fitness(child);
+      //fitness(child);
+      /*
       if(child.getFitness() < t1.getFitness() && child.getFitness() < t2.getFitness()) {
         mutate(child);
         repairTimeTable(child);
@@ -252,6 +253,9 @@ public class GA {
               mutate(child);
         repairTimeTable(child);
       }
+      */
+      mutate(child);
+      repairTimeTable(child);
       fitness(child);
       population.addIndividual(child);
     }
