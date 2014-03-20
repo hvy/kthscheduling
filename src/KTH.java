@@ -17,6 +17,7 @@ public class KTH {
   private Map<Integer, StudentGroup> studentGroups;
   private Map<Integer, Lecturer> lecturers;
   private Map<Integer, Event> events;
+  private ArrayList<Integer> eventIds;
 
   // TODO: add some maps over the IDs?
 
@@ -26,6 +27,7 @@ public class KTH {
     studentGroups = new HashMap<Integer, StudentGroup>();
     lecturers = new HashMap<Integer, Lecturer>();
     events = new HashMap<Integer, Event>();
+    eventIds = new ArrayList<Integer>();
   }
 
   public int addRoom(Room room) {
@@ -69,15 +71,12 @@ public class KTH {
     return lecturers;
   }
   
-  /* // not needed
-  public int addEvent(Event event) {
-    events.put(event.getId(), event);
-    return event.getId();
-  }
-  */
-
   public Event getEvent(int id) {
     return events.get(id);
+  }
+
+  public int getRandomEventId(Random rand) {
+    return eventIds.get(rand.nextInt(eventIds.size()));
   }
 
   public Map<Integer, Event> getEvents() {
@@ -107,6 +106,7 @@ public class KTH {
                                   sg);
 
           events.put(event.getId(), event);
+          eventIds.add(event.getId());
         }
         
         // TODO: should maxsize of a subgroup be 40? to fit in the rooms
@@ -128,6 +128,7 @@ public class KTH {
                                     sg);
 
             events.put(event.getId(), event);
+            eventIds.add(event.getId());
             sgSize = sgSize - evSize;
 
           }
@@ -149,6 +150,7 @@ public class KTH {
                                     sg);
 
             events.put(event.getId(), event);
+            eventIds.add(event.getId());
             sgSize = sgSize - evSize;
           }
         }
