@@ -270,7 +270,8 @@ public class GA {
       RoomTimeTable rtt = new RoomTimeTable(rtts1[i].getRoom());
 
       // for each available time
-      for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS; timeslot++) {
+      for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS; 
+                                                            timeslot++) {
         for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
           int allele;
           if (rand.nextBoolean()) {
@@ -301,7 +302,10 @@ public class GA {
   }
 
   private void repairTimeTable(TimeTable tt) {
-    // TODO
+    // remove double booked events and keep only one
+    // randomly?
+
+    // place unbooked events on free spaces
   }
 
   // Fixed mutation rate right now meaning each 
@@ -380,12 +384,14 @@ public class GA {
 
   // TODO: better name please
   // probably not needed
-  private int coursesRequiredEvents(TimeTable tt) {
+  private int unbookedEvents(TimeTable tt) {
     return 0;
   }
 
   // TODO: will this be needed?
   private int eventDoubleBooked(TimeTable tt) {
+    
+
     return 0;
   }
 
