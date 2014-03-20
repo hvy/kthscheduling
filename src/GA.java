@@ -5,9 +5,11 @@ import java.io.*;
  * Performs the Genetic Algorithm(GA) on the KTH data set.
  */
 public class GA {
-  private final int MAX_POPULATION_SIZE = 20; // TODO: test different sizes
   private final int DESIRED_FITNESS = 0;
-  private final int MUTATION_RATE = 200; // Compared with 1000
+  private final int MAX_POPULATION_SIZE = 100; // TODO: test different sizes
+  private final int CULLED_POPULATION_SIZE = 30;
+  private final int CROSSOVER_GENERATION_SIZE = 50;  
+  private final int MUTATION_RATE = 30; // Compared with 1000
 
   private Population population;
   private KTH kth;
@@ -24,6 +26,7 @@ public class GA {
     // create the initial randomized population
     kth.createEvents();
     createPopulation();
+    int numberOfGenerations = 1;
 
     // run until the fitness is high enough
     // high enough should at least mean that
@@ -38,31 +41,14 @@ public class GA {
       fitness(tt);
     }
     population.sortIndividuals();
-    TimeTable tt1 = population.getIndividual(0);
-          for(RoomTimeTable rtt : tt1.getRoomTimeTables()) {
-        System.out.println("=============================================");
-        System.out.println(rtt);
-      }
-      System.out.println("=========================================================");
-      System.out.println("=========================================================");
-    TimeTable tt2 = population.getIndividual(1);
-          for(RoomTimeTable rtt : tt2.getRoomTimeTables()) {
-        System.out.println("=============================================");
-        System.out.println(rtt);
-      }
-      System.out.println("=========================================================");
-      System.out.println("=========================================================");
-    TimeTable tt3 = crossover(tt1, tt2);
-          for(RoomTimeTable rtt : tt3.getRoomTimeTables()) {
-        System.out.println("=============================================");
-        System.out.println(rtt);
-      }
-    /*
+
     while (population.getTopIndividual().getFitness() < DESIRED_FITNESS) {
       System.out.println("Best fitness: " + population.getTopIndividual().getFitness());
 
       population = cullPopulation(population);
-      breed(population);
+      population.sortIndividuals();
+      population = breed(population);
+      population.sortIndividuals();
 
       // TODO //////////////
       // have small chance of keeping a bad one
@@ -87,13 +73,18 @@ public class GA {
       // when checking if a studentgroup is double booked
       // it should be allowed to have a studentgroup id double booked
       // if the double bookings are class or lab
+      
+      /* DEBUG
       TimeTable bestTimeTable = population.getTopIndividual();
       for(RoomTimeTable rtt : bestTimeTable.getRoomTimeTables()) {
         System.out.println("=============================================");
         System.out.println(rtt);
       }
+      END_DEBUG */
+      numberOfGenerations++;
+      System.out.println("Number of generations: " + numberOfGenerations);
+      System.out.println(population.getTopIndividual().getFitness());
     }
-    */
     return population.getTopIndividual();
   }
 
@@ -221,31 +212,29 @@ public class GA {
 
   private void createPopulation() {
     population.createRandomIndividuals(MAX_POPULATION_SIZE, kth);
-
   }
 
   private Population cullPopulation(Population population) {
     Population culledPopulation = new Population();
-
     ListIterator<TimeTable> it = population.listIterator();
 
     // take the top half of population
     // assumes individuals are sorted
-    for (int i = 0; i < MAX_POPULATION_SIZE / 2; i++) {
+    Random rand = new Random();
+    for (int i = 0; i < CULLED_POPULATION_SIZE; i++) {
       culledPopulation.addIndividual(it.next());
     }
-
-    // replace the population with the culled population
+    
     return culledPopulation;
   }
 
   // implement different selection/crossover algorithms here
   // mutate according to mutation rate
-  private void breed(Population population) {
+  private Population breed(Population population) {
     Random rand = new Random(System.currentTimeMillis());
-
     List<Integer> parentIndices = new ArrayList<Integer>();
-    for (int i = 0; i < MAX_POPULATION_SIZE / 2; i++) {
+    
+    for (int i = 0; i < CULLED_POPULATION_SIZE; i++) {
       parentIndices.add(i);
     }
 
@@ -257,15 +246,12 @@ public class GA {
       int p2 = parentIndices.get(1);
       TimeTable t1 = population.getIndividual(p1);
       TimeTable t2 = population.getIndividual(p2);
-
       TimeTable child = crossover(t1, t2);
       mutate(child);
       fitness(child);
-
       population.addIndividual(child);
     }
-
-    population.sortIndividuals();
+    return population;
   }
 
   // For each gene (booking in a timeslot), take with equal
@@ -375,8 +361,8 @@ public class GA {
     tt.setFitness(fitness);
 
     // temp
-    System.out.println("Fitness calculated in " + (endTime - startTime) + " ns");
-    System.out.println(fitness);
+    //System.out.println("Fitness calculated in " + (endTime - startTime) + " ns");
+    //System.out.println(fitness);
   }
 
   //////////////////////////
