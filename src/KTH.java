@@ -157,4 +157,31 @@ public class KTH {
       }
     }
   }
+  
+  public void printTimeTable(TimeTable tt) {
+    StringBuilder sb = new StringBuilder();
+    for(RoomTimeTable rtt : tt.getRoomTimeTables()) {
+      sb.append("=====================================================================================================================");    
+      sb.append("Room: " + rtt.getRoom().getName() + " Capacity: " + rtt.getRoom().getCapacity() + "\n");
+      for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS; timeslot++) {
+        for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
+          int eventId = rtt.getEvent(day, timeslot);
+          if(eventId != 0) {
+            Event event = events.get(eventId);
+            sb.append("[ " + event.getCourse().getId() + " " + event.getStudentGroup().getName() + " ");
+            if(event.getType() == Event.Type.LECTURE) {
+              sb.append(event.getLecturer().getName() + " ]");
+            } else {
+              sb.append("    ]");
+            }
+          } else {
+            sb.append("[    -    ]");
+          }
+        }
+        sb.append("\n");
+      }    
+    }
+    System.out.println(sb.toString());
+  }
+  
 }

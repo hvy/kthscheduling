@@ -1,6 +1,13 @@
 import java.util.*;
 import java.io.*;
 
+/*
+  TODO
+  - New crossover with point
+  - Do not eliminate all bad time tables but letting some join the crossoever
+  - When selecting crossoever parents, use the random wheel
+*/
+
 public class Main {
   // URL to the university data file
   private static final String UNIVERSITY_DATA_URL = "../input/ficUni";
@@ -12,10 +19,13 @@ public class Main {
     ga.loadData(UNIVERSITY_DATA_URL);
     ga.loadConstraints(UNIVERSITY_CONSTRAINTS_URL); // not yet implemented
     TimeTable bestTimeTable = ga.generateTimeTable();
+    ga.printTimeTable(bestTimeTable);
+    /*
     for(RoomTimeTable rtt : bestTimeTable.getRoomTimeTables()) {
         System.out.println("=============================================");
         System.out.println(rtt);
     }
+    */
     writeToFile(bestTimeTable, OUTPUT_FILE_NAME_URL);
   }
 

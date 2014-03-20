@@ -6,8 +6,8 @@ import java.io.*;
  */
 public class GA {
   private final int DESIRED_FITNESS = 0;
-  private final int MAX_POPULATION_SIZE = 100; // TODO: test different sizes
-  private final int CULLED_POPULATION_SIZE = 10;
+  private final int MAX_POPULATION_SIZE = 1000; // TODO: test different sizes
+  private final int CULLED_POPULATION_SIZE = 150;
   private final int CROSSOVER_GENERATION_SIZE = 50;  
   private final int MUTATION_RATE = 50; // Compared with 1000
 
@@ -41,7 +41,8 @@ public class GA {
       TimeTable tt = it.next();
       fitness(tt);
     }
-    population.sortIndividuals(); // sort first generation by fitness
+    // initial sorting
+    population.sortIndividuals();
     
     while (population.getTopIndividual().getFitness() < DESIRED_FITNESS) {
       System.out.println("Best fitness: " + population.getTopIndividual().getFitness());
@@ -451,10 +452,18 @@ public class GA {
     int roomCapacityBreaches = roomCapacityBreaches(tt);
     int roomTypeBreaches = roomTypeBreaches(tt);
 
-    int numBreaches = studentGroupDoubleBookings +
+    int numBreaches = studentGroupDoubleBookings * 2+
                       lecturerDoubleBookings +
-                      roomCapacityBreaches +
-                      roomTypeBreaches;
+                      roomCapacityBreaches * 4 +
+                      roomTypeBreaches * 4;
+
+    System.out.println("=============================================");
+    System.out.println(
+      studentGroupDoubleBookings + " " + 
+      lecturerDoubleBookings + " " +
+      roomCapacityBreaches + " " +
+      roomTypeBreaches
+      );
 
     // TODO weight the different constraints breaches
     int fitness = -1 * numBreaches;
@@ -488,7 +497,7 @@ public class GA {
 
   // num times a studentgroup is double booked
   // OPTIMIZE: just iterate over the rooms once instead?
-  private int studentGroupDoubleBookings(TimeTable tt) {
+  private int studentGroupDoubleBookingsOld(TimeTable tt) {
     int numBreaches = 0;
 
     RoomTimeTable[] rtts = tt.getRoomTimeTables();
@@ -518,6 +527,10 @@ public class GA {
                   evTypeSet = true;
 
                 } else {
+                  // TODO: om den första är en lab/lesson
+                  // och en lecture är inbokad i ett senare rum
+                  // kommer antalet double bookings vara fel
+
                   if (eventType == Event.Type.LECTURE) {
                     numDoubleBookings++;
 
@@ -542,6 +555,89 @@ public class GA {
     }
 
     return numBreaches;
+  }
+
+  private int studentGroupDoubleBookings(TimeTable tt) {
+    int numBreaches = 0;
+
+    RoomTimeTable[] rtts = tt.getRoomTimeTables();
+
+    for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS;
+                                                        timeslot++) {
+      for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
+        for (StudentGroup sg : kth.getStudentGroups().values()) {
+          int numLectures = 0;
+          int numLessons = 0;
+          int numLabs = 0;
+
+          for (RoomTimeTable rtt : rtts) {
+            int eventID = rtt.getEvent(day, timeslot);
+            
+            // only look at booked timeslots
+            if (eventID != 0) {
+              Event event = kth.getEvent(eventID);
+              int sgID = event.getStudentGroup().getId();
+
+              if (sgID == sg.getId()) {
+                Event.Type eventType = event.getType();
+                if (eventType == Event.Type.LECTURE) {
+                  numLectures++;
+                
+                } else if (eventType == Event.Type.LESSON) {
+                  numLessons++;
+
+                } else {
+                  // lab
+                  numLabs++;
+                }
+              }
+            }
+          }
+
+          // TODO: how do we calculate the number of breaches here?
+          // if for example numLectures == 1, should the rest be violations?
+          // or
+          
+          int max = max(numLectures, numLessons, numLabs);
+
+          if (max == numLessons) {
+            numBreaches += numLectures + numLabs;            
+
+          } else if (max == numLabs) {
+            numBreaches += numLectures + numLessons;
+
+          } else {
+            // max is numLectures
+            if (numLessons > 0 || numLabs > 0) {
+              if (numLessons > numLabs) {
+                numBreaches += numLectures + numLabs;
+              } else {
+                numBreaches += numLectures + numLessons;
+              }
+            
+            } else {
+              numBreaches += numLectures - 1;
+            }
+          }
+        }
+      }
+    }
+
+    return numBreaches;
+  }
+
+  private int max(int a, int b, int c) {
+    int max = a;
+    
+    if (b > max) {
+      max = b;
+    }
+    
+    if (c > max) {
+      max = c;
+    }
+
+    return max;
   }
 
   // num times a lecturer is double booked
@@ -675,5 +771,10 @@ public class GA {
   private double unusedTimeSlots() {
     // räkna antal håltimmar?
     return 0.0;
+  }
+  
+  // print the given time table in a readable format
+  public void printTimeTable(TimeTable tt) {
+    kth.printTimeTable(tt);
   }
 }
