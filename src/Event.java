@@ -32,6 +32,10 @@ public class Event {
 		return course;
 	}
 
+  public Lecturer getLecturer() {
+    return lecturer;
+  }
+
 	public Type getType() {
 		return type;
 	}

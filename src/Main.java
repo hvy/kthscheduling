@@ -3,7 +3,7 @@ import java.io.*;
 
 public class Main {
   // URL to the university data file
-  private static final String UNIVERSITY_DATA_URL = "../input/minikth2";
+  private static final String UNIVERSITY_DATA_URL = "../input/ficUni";
   private static final String UNIVERSITY_CONSTRAINTS_URL = "../input/constraints";
   private static final String OUTPUT_FILE_NAME_URL = "../timetable";
 

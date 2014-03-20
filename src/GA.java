@@ -6,8 +6,8 @@ import java.io.*;
  */
 public class GA {
   private final int DESIRED_FITNESS = 0;
-  private final int MAX_POPULATION_SIZE = 30; // TODO: test different sizes
-  private final int CULLED_POPULATION_SIZE = 15;
+  private final int MAX_POPULATION_SIZE = 100; // TODO: test different sizes
+  private final int CULLED_POPULATION_SIZE = 10;
   private final int CROSSOVER_GENERATION_SIZE = 50;  
   private final int MUTATION_RATE = 50; // Compared with 1000
 
@@ -25,6 +25,7 @@ public class GA {
   public TimeTable generateTimeTable() {
     // create the initial randomized population
     kth.createEvents();
+    System.out.println(kth.getEvents().size());
     createPopulation();
     int numberOfGenerations = 1;
 
@@ -34,13 +35,14 @@ public class GA {
     // adjust for the number of soft constraints to be solved too
     // use another stop criteria too, in order to not run forever?
 
+    // initial fitness
     ListIterator<TimeTable> it = population.listIterator();
     while(it.hasNext()) {
       TimeTable tt = it.next();
       fitness(tt);
     }
     population.sortIndividuals(); // sort first generation by fitness
-
+    
     while (population.getTopIndividual().getFitness() < DESIRED_FITNESS) {
       System.out.println("Best fitness: " + population.getTopIndividual().getFitness());
 
@@ -569,7 +571,9 @@ public class GA {
               // only check lectures since lecturers are only
               // attached to lecture events
               if (event.getType() == Event.Type.LECTURE) {
-                numBookings++;
+                if (event.getLecturer().getId() == lecturer.getId()) {
+                  numBookings++;
+                }
               }
             }
           }
