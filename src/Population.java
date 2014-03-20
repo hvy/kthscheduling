@@ -51,7 +51,7 @@ public class Population {
       int timeSlot = 0;
 
       // assign all event to any randomly selected available timeslot
-      Random rand = new Random();
+      Random rand = new Random(System.currentTimeMillis());
       for(Event e : kth.getEvents().values()) {
         TimeSlot availableTimeSlot = availableTimeSlots.get(rand.nextInt(availableTimeSlots.size()));
         RoomTimeTable rtt = tt.getRoomTimeTables()[availableTimeSlot.roomId];
