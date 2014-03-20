@@ -5,9 +5,11 @@ import java.io.*;
  * Performs the Genetic Algorithm(GA) on the KTH data set.
  */
 public class GA {
-  private final int MAX_POPULATION_SIZE = 20; // TODO: test different sizes
   private final int DESIRED_FITNESS = 0;
-  private final int MUTATION_RATE = 10; // Compared with 1000
+  private final int MAX_POPULATION_SIZE = 500; // TODO: test different sizes
+  private final int CULLED_POPULATION_SIZE = 30;
+  private final int CROSSOVER_GENERATION_SIZE = 50;  
+  private final int MUTATION_RATE = 30; // Compared with 1000
 
   private Population population;
   private KTH kth;
@@ -24,6 +26,7 @@ public class GA {
     // create the initial randomized population
     kth.createEvents();
     createPopulation();
+    int numberOfGenerations = 1;
 
     // run until the fitness is high enough
     // high enough should at least mean that
@@ -41,24 +44,18 @@ public class GA {
     // initial sorting
     population.sortIndividuals();
 
-    System.out.println("Best fitness: " + 
-                          population.getTopIndividual().getFitness());
-
-    int iter = 0;
     while (population.getTopIndividual().getFitness() < DESIRED_FITNESS) {
-      System.out.println("Best fitness: " + 
-                           population.getTopIndividual().getFitness());
-      iter++;
-
+      System.out.println("Best fitness: " + population.getTopIndividual().getFitness());
 
       population = cullPopulation(population);
-      System.out.println("POP SIZE:" + population.size());
-      breed(population);
+      population.sortIndividuals();
+      population = breed(population);
+      population.sortIndividuals();
 
       // TODO //////////////
       // have small chance of keeping a bad one
       // different chances for different intervals of fitness
-      
+
       // check whether java random is good enough
 
       // save some of the good parent as well
@@ -78,10 +75,18 @@ public class GA {
       // when checking if a studentgroup is double booked
       // it should be allowed to have a studentgroup id double booked
       // if the double bookings are class or lab
-      ///////////////////////
+      
+      /* DEBUG
+      TimeTable bestTimeTable = population.getTopIndividual();
+      for(RoomTimeTable rtt : bestTimeTable.getRoomTimeTables()) {
+        System.out.println("=============================================");
+        System.out.println(rtt);
+      }
+      END_DEBUG */
+      numberOfGenerations++;
+      System.out.println("Number of generations: " + numberOfGenerations);
+      System.out.println(population.getTopIndividual().getFitness());
     }
-
-    System.out.println("Iteration: " + iter);
     return population.getTopIndividual();
   }
 
@@ -120,13 +125,13 @@ public class GA {
           int cap = Integer.parseInt(data[1]);
           Event.Type type = Event.generateType(Integer.parseInt(data[2]));
           Room room = new Room(roomName, cap, type);
-          // DEBUG
+          /* DEBUG
           System.out.println("=== ROOM ===");
           System.out.println("ID: " + room.getId());
           System.out.println("Name: " + room.getName());
           System.out.println("Capacity: " + room.getCapacity());
           System.out.println("Type: " + room.getType());
-          //
+          */
           kth.addRoom(room);
 
         } else if(readingSection.equals("COURSES")) {
@@ -135,13 +140,13 @@ public class GA {
           int numLessons = Integer.parseInt(data[2]);
           int numLabs = Integer.parseInt(data[3]);
           Course course = new Course(courseName, numLectures, numLessons, numLabs);
-          // DEBUG
+          /* DEBUG
           System.out.println("=== COURSE ===");
           System.out.println("ID: " + course.getId());
           System.out.println("#Lectures: " + course.getNumLectures());
           System.out.println("#Lessons: " + course.getNumLessons());
           System.out.println("#Labs: " + course.getNumLabs());
-          // END_DEBUG
+          */
           courseId = kth.addCourse(course);
           courseNameToId.put(courseName, courseId);
 
@@ -155,8 +160,7 @@ public class GA {
             courseId = courseNameToId.get(courseName);
             lecturer.addCourse(kth.getCourses().get(courseId));
           }
-
-          // DEBUG
+          /* DEBUG
           System.out.println("=== LECTURER ===");
           System.out.println("ID: " + lecturer.getId());
           System.out.println("Name: " + lecturer.getName());
@@ -166,10 +170,8 @@ public class GA {
             System.out.print(c.getId() + " ");
           }
           System.out.println();
-          // END_DEBUG
-
+          */
           kth.addLecturer(lecturer);
-
         } else if(readingSection.equals("STUDENTGROUPS")) {
           studentGroupName = data[0];
           int size = Integer.parseInt(data[1]);
@@ -179,12 +181,12 @@ public class GA {
             courseId = courseNameToId.get(courseName);
             studentGroup.addCourse(kth.getCourses().get(courseId));
           }
-          // DEBUG
+          /* DEBUG
           System.out.println("=== STUDENT GROUP ===");
           System.out.println("ID: " + studentGroup.getId());
           System.out.println("Name: " + studentGroup.getName());
           System.out.println("Number of students: " + studentGroup.getSize());
-          //
+          */
           kth.addStudentGroup(studentGroup);
         }
       }
@@ -209,31 +211,29 @@ public class GA {
 
   private void createPopulation() {
     population.createRandomIndividuals(MAX_POPULATION_SIZE, kth);
-
   }
 
   private Population cullPopulation(Population population) {
     Population culledPopulation = new Population();
-
     ListIterator<TimeTable> it = population.listIterator();
 
     // take the top half of population
     // assumes individuals are sorted
-    for (int i = 0; i < MAX_POPULATION_SIZE / 2; i++) {
+    Random rand = new Random();
+    for (int i = 0; i < CULLED_POPULATION_SIZE; i++) {
       culledPopulation.addIndividual(it.next());
     }
-
-    // replace the population with the culled population
+    
     return culledPopulation;
   }
 
   // implement different selection/crossover algorithms here
   // mutate according to mutation rate
-  private void breed(Population population) {
+  private Population breed(Population population) {
     Random rand = new Random(System.currentTimeMillis());
-
     List<Integer> parentIndices = new ArrayList<Integer>();
-    for (int i = 0; i < MAX_POPULATION_SIZE / 2; i++) {
+    
+    for (int i = 0; i < CULLED_POPULATION_SIZE; i++) {
       parentIndices.add(i);
     }
 
@@ -245,16 +245,13 @@ public class GA {
       int p2 = parentIndices.get(1);
       TimeTable t1 = population.getIndividual(p1);
       TimeTable t2 = population.getIndividual(p2);
-
       TimeTable child = crossover(t1, t2);
       mutate(child);
       repairTimeTable(child);
       fitness(child);
-
       population.addIndividual(child);
     }
-
-    population.sortIndividuals();
+    return population;
   }
 
   // For each gene (booking in a timeslot), take with equal
@@ -379,18 +376,22 @@ public class GA {
     }
   }
 
-  // Fixed mutation rate right now meaning each 
+  // Fixed mutation rate right now meaning each
   // individual is mutated slightly
   private void mutate(TimeTable tt) {
-    Random rand = new Random(System.currentTimeMillis());
+    //mutateRandomGene(tt);
+    mutateSwapGene(tt);
+  }
 
+  private void mutateSwapGene(TimeTable tt) {
+    Random rand = new Random(System.currentTimeMillis());
     RoomTimeTable[] rtts = tt.getRoomTimeTables();
 
     for (int i = 0; i < kth.getNumRooms(); i++) {
       RoomTimeTable rtt = new RoomTimeTable(rtts[i].getRoom());
 
       // for each available time
-      for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS; 
+      for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS;
                                                             timeslot++) {
         for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
           if (rand.nextInt(1000) < MUTATION_RATE) {
@@ -402,6 +403,29 @@ public class GA {
       }
     }
   }
+  
+  private void mutateRandomGene(TimeTable tt) {
+    Random rand = new Random(System.currentTimeMillis());
+    RoomTimeTable[] rtts = tt.getRoomTimeTables();
+
+    for (int i = 0; i < kth.getNumRooms(); i++) {
+      RoomTimeTable rtt = new RoomTimeTable(rtts[i].getRoom());
+
+      // for each available time
+      for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS;
+                                                            timeslot++) {
+        for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
+          if (rand.nextInt(1000) < MUTATION_RATE) {
+            // mutate this gene
+            int swapTargetDay = rand.nextInt(RoomTimeTable.NUM_DAYS);
+            int swapTargetTimeslot = rand.nextInt(RoomTimeTable.NUM_TIMESLOTS); 
+            int allele = kth.getRandomEventId(rand);
+            rtt.setEvent(day, timeslot, allele);
+          }
+        }
+      }
+    }
+  } 
 
   // Idea for fitness:
   // Each of the softconstraints met should give a positive value
@@ -437,8 +461,8 @@ public class GA {
     tt.setFitness(fitness);
 
     // temp
-    System.out.println("Fitness calculated in " + (endTime - startTime) + " ns");
-    System.out.println(fitness);
+    //System.out.println("Fitness calculated in " + (endTime - startTime) + " ns");
+    //System.out.println(fitness);
   }
 
   //////////////////////////
@@ -468,7 +492,7 @@ public class GA {
 
   // num times a studentgroup is double booked
   // OPTIMIZE: just iterate over the rooms once instead?
-  private int studentGroupDoubleBookings(TimeTable tt) {
+  private int studentGroupDoubleBookingsOld(TimeTable tt) {
     int numBreaches = 0;
 
     RoomTimeTable[] rtts = tt.getRoomTimeTables();
@@ -498,6 +522,10 @@ public class GA {
                   evTypeSet = true;
 
                 } else {
+                  // TODO: om den första är en lab/lesson
+                  // och en lecture är inbokad i ett senare rum
+                  // kommer antalet double bookings vara fel
+
                   if (eventType == Event.Type.LECTURE) {
                     numDoubleBookings++;
 
@@ -522,6 +550,89 @@ public class GA {
     }
 
     return numBreaches;
+  }
+
+  private int studentGroupDoubleBookings(TimeTable tt) {
+    int numBreaches = 0;
+
+    RoomTimeTable[] rtts = tt.getRoomTimeTables();
+
+    for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS;
+                                                        timeslot++) {
+      for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
+        for (StudentGroup sg : kth.getStudentGroups().values()) {
+          int numLectures = 0;
+          int numLessons = 0;
+          int numLabs = 0;
+
+          for (RoomTimeTable rtt : rtts) {
+            int eventID = rtt.getEvent(day, timeslot);
+            
+            // only look at booked timeslots
+            if (eventID != 0) {
+              Event event = kth.getEvent(eventID);
+              int sgID = event.getStudentGroup().getId();
+
+              if (sgID == sg.getId()) {
+                Event.Type eventType = event.getType();
+                if (eventType == Event.Type.LECTURE) {
+                  numLectures++;
+                
+                } else if (eventType == Event.Type.LESSON) {
+                  numLessons++;
+
+                } else {
+                  // lab
+                  numLabs++;
+                }
+              }
+            }
+          }
+
+          // TODO: how do we calculate the number of breaches here?
+          // if for example numLectures == 1, should the rest be violations?
+          // or
+          
+          int max = max(numLectures, numLessons, numLabs);
+
+          if (max == numLessons) {
+            numBreaches += numLectures + numLabs;            
+
+          } else if (max == numLabs) {
+            numBreaches += numLectures + numLessons;
+
+          } else {
+            // max is numLectures
+            if (numLessons > 0 || numLabs > 0) {
+              if (numLessons > numLabs) {
+                numBreaches += numLectures + numLabs;
+              } else {
+                numBreaches += numLectures + numLessons;
+              }
+            
+            } else {
+              numBreaches += numLectures - 1;
+            }
+          }
+        }
+      }
+    }
+
+    return numBreaches;
+  }
+
+  private int max(int a, int b, int c) {
+    int max = a;
+    
+    if (b > max) {
+      max = b;
+    }
+    
+    if (c > max) {
+      max = c;
+    }
+
+    return max;
   }
 
   // num times a lecturer is double booked

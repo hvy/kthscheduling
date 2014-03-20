@@ -3,7 +3,7 @@ import java.io.*;
 
 public class Main {
   // URL to the university data file
-  private static final String UNIVERSITY_DATA_URL = "../input/minikth";
+  private static final String UNIVERSITY_DATA_URL = "../input/minikth2";
   private static final String UNIVERSITY_CONSTRAINTS_URL = "../input/constraints";
   private static final String OUTPUT_FILE_NAME_URL = "../timetable";
 
@@ -12,9 +12,13 @@ public class Main {
     ga.loadData(UNIVERSITY_DATA_URL);
     ga.loadConstraints(UNIVERSITY_CONSTRAINTS_URL); // not yet implemented
     TimeTable bestTimeTable = ga.generateTimeTable();
+    for(RoomTimeTable rtt : bestTimeTable.getRoomTimeTables()) {
+        System.out.println("=============================================");
+        System.out.println(rtt);
+    }
     writeToFile(bestTimeTable, OUTPUT_FILE_NAME_URL);
   }
-  
+
   /**
    * Write the best timetable to a file
    */
