@@ -6,7 +6,7 @@ import java.io.*;
  */
 public class GA {
   private final int DESIRED_FITNESS = 0;
-  private final int MAX_POPULATION_SIZE = 100; // TODO: test different sizes
+  private final int MAX_POPULATION_SIZE = 500; // TODO: test different sizes
   private final int CULLED_POPULATION_SIZE = 30;
   private final int CROSSOVER_GENERATION_SIZE = 50;  
   private final int MUTATION_RATE = 30; // Compared with 1000
@@ -123,13 +123,13 @@ public class GA {
           int cap = Integer.parseInt(data[1]);
           Event.Type type = Event.generateType(Integer.parseInt(data[2]));
           Room room = new Room(roomName, cap, type);
-          // DEBUG
+          /* DEBUG
           System.out.println("=== ROOM ===");
           System.out.println("ID: " + room.getId());
           System.out.println("Name: " + room.getName());
           System.out.println("Capacity: " + room.getCapacity());
           System.out.println("Type: " + room.getType());
-          //
+          */
           kth.addRoom(room);
 
         } else if(readingSection.equals("COURSES")) {
@@ -138,13 +138,13 @@ public class GA {
           int numLessons = Integer.parseInt(data[2]);
           int numLabs = Integer.parseInt(data[3]);
           Course course = new Course(courseName, numLectures, numLessons, numLabs);
-          // DEBUG
+          /* DEBUG
           System.out.println("=== COURSE ===");
           System.out.println("ID: " + course.getId());
           System.out.println("#Lectures: " + course.getNumLectures());
           System.out.println("#Lessons: " + course.getNumLessons());
           System.out.println("#Labs: " + course.getNumLabs());
-          // END_DEBUG
+          */
           courseId = kth.addCourse(course);
           courseNameToId.put(courseName, courseId);
 
@@ -158,8 +158,7 @@ public class GA {
             courseId = courseNameToId.get(courseName);
             lecturer.addCourse(kth.getCourses().get(courseId));
           }
-
-          // DEBUG
+          /* DEBUG
           System.out.println("=== LECTURER ===");
           System.out.println("ID: " + lecturer.getId());
           System.out.println("Name: " + lecturer.getName());
@@ -169,10 +168,8 @@ public class GA {
             System.out.print(c.getId() + " ");
           }
           System.out.println();
-          // END_DEBUG
-
+          */
           kth.addLecturer(lecturer);
-
         } else if(readingSection.equals("STUDENTGROUPS")) {
           studentGroupName = data[0];
           int size = Integer.parseInt(data[1]);
@@ -182,12 +179,12 @@ public class GA {
             courseId = courseNameToId.get(courseName);
             studentGroup.addCourse(kth.getCourses().get(courseId));
           }
-          // DEBUG
+          /* DEBUG
           System.out.println("=== STUDENT GROUP ===");
           System.out.println("ID: " + studentGroup.getId());
           System.out.println("Name: " + studentGroup.getName());
           System.out.println("Number of students: " + studentGroup.getSize());
-          //
+          */
           kth.addStudentGroup(studentGroup);
         }
       }
@@ -248,6 +245,7 @@ public class GA {
       TimeTable t2 = population.getIndividual(p2);
       TimeTable child = crossover(t1, t2);
       mutate(child);
+      repairTimeTable(child);
       fitness(child);
       population.addIndividual(child);
     }
@@ -269,7 +267,8 @@ public class GA {
       RoomTimeTable rtt = new RoomTimeTable(rtts1[i].getRoom());
 
       // for each available time
-      for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS; timeslot++) {
+      for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS; 
+                                                            timeslot++) {
         for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
           int allele;
           if (rand.nextBoolean()) {
@@ -288,8 +287,6 @@ public class GA {
       child.putRoomTimeTable(i, rtt);
     }
 
-    repairTimeTable(child);
-
     return child;
   }
 
@@ -300,14 +297,92 @@ public class GA {
   }
 
   private void repairTimeTable(TimeTable tt) {
-    // TODO
+    HashMap<Integer, LinkedList<RoomDayTime>> locations = new HashMap<Integer, 
+                                                    LinkedList<RoomDayTime>>();
+    
+    LinkedList<RoomDayTime> unusedSlots = new LinkedList<RoomDayTime>();
+    
+    // initiate number of bookings to 0
+    for (int eventID : kth.getEvents().keySet()) {
+      locations.put(eventID, new LinkedList<RoomDayTime>());
+    }
+
+    RoomTimeTable[] rtts = tt.getRoomTimeTables();
+
+    for (int i = 0; i < kth.getNumRooms(); i++) {
+      RoomTimeTable rtt = rtts[i];
+      // for each available time
+      for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS;
+                                                     timeslot++) {
+        for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
+          int bookedEvent = rtt.getEvent(day, timeslot);
+          if (bookedEvent == 0) {
+            // add to usable slots
+            unusedSlots.add(new RoomDayTime(i, day, timeslot));
+
+          } else {
+            // save the location
+            locations.get(bookedEvent).add(new RoomDayTime(i, day, timeslot));
+          }
+        }
+      }
+    }
+    
+    List<Integer> unbookedEvents = new LinkedList<Integer>();
+
+    for (int eventID : kth.getEvents().keySet()) {
+      if (locations.get(eventID).size() == 0) {
+        // this event is unbooked
+        unbookedEvents.add(eventID);
+      
+      } else if (locations.get(eventID).size() > 1) {
+        // this is event is booked more than once
+        // randomly make those slots unused until only one remains
+        LinkedList<RoomDayTime> slots = locations.get(eventID);
+        Collections.shuffle(slots);
+        
+        // TODO: this could probably lead to infinite loops if input
+        // data is bad
+        while (slots.size() > 1) {
+          RoomDayTime rdt = slots.removeFirst();
+          
+          // mark this slot as unused
+          unusedSlots.add(rdt);
+          rtts[rdt.room].setEvent(rdt.day, rdt.time, 0);
+        }
+      }
+    }
+
+    // now put each unbooked event in an unused slot
+    Collections.shuffle(unusedSlots);
+    for (int eventID : unbookedEvents) {
+      RoomDayTime rdt = unusedSlots.removeFirst();
+      rtts[rdt.room].setEvent(rdt.day, rdt.time, eventID);
+    }
+  }
+  
+  // wrapper class only used in repair function
+  private class RoomDayTime {
+    int room;
+    int day;
+    int time;
+
+    RoomDayTime(int room, int day, int time) {
+      this.room = room;
+      this.day = day;
+      this.time = time;
+    }
   }
 
   // Fixed mutation rate right now meaning each
   // individual is mutated slightly
   private void mutate(TimeTable tt) {
-    Random rand = new Random(System.currentTimeMillis());
+    //mutateRandomGene(tt);
+    mutateSwapGene(tt);
+  }
 
+  private void mutateSwapGene(TimeTable tt) {
+    Random rand = new Random(System.currentTimeMillis());
     RoomTimeTable[] rtts = tt.getRoomTimeTables();
 
     for (int i = 0; i < kth.getNumRooms(); i++) {
@@ -326,6 +401,29 @@ public class GA {
       }
     }
   }
+  
+  private void mutateRandomGene(TimeTable tt) {
+    Random rand = new Random(System.currentTimeMillis());
+    RoomTimeTable[] rtts = tt.getRoomTimeTables();
+
+    for (int i = 0; i < kth.getNumRooms(); i++) {
+      RoomTimeTable rtt = new RoomTimeTable(rtts[i].getRoom());
+
+      // for each available time
+      for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS;
+                                                            timeslot++) {
+        for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
+          if (rand.nextInt(1000) < MUTATION_RATE) {
+            // mutate this gene
+            int swapTargetDay = rand.nextInt(RoomTimeTable.NUM_DAYS);
+            int swapTargetTimeslot = rand.nextInt(RoomTimeTable.NUM_TIMESLOTS); 
+            int allele = kth.getRandomEventId(rand);
+            rtt.setEvent(day, timeslot, allele);
+          }
+        }
+      }
+    }
+  } 
 
   // Idea for fitness:
   // Each of the softconstraints met should give a positive value
@@ -379,12 +477,14 @@ public class GA {
 
   // TODO: better name please
   // probably not needed
-  private int coursesRequiredEvents(TimeTable tt) {
+  private int unbookedEvents(TimeTable tt) {
     return 0;
   }
 
   // TODO: will this be needed?
   private int eventDoubleBooked(TimeTable tt) {
+    
+
     return 0;
   }
 

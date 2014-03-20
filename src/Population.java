@@ -57,12 +57,11 @@ public class Population {
         RoomTimeTable rtt = tt.getRoomTimeTables()[availableTimeSlot.roomId];
         rtt.setEvent(availableTimeSlot.day, availableTimeSlot.timeSlot, e.getId());
         availableTimeSlots.remove(availableTimeSlot);
-
-        // DEBUG
+        /* DEBUG
         System.out.println("==============");
         System.out.println("ROOM TIME TABLE ID: " + rtt.getRoom().getName());
         System.out.println("Day: " + availableTimeSlot.day + " Timeslot: " + availableTimeSlot.timeSlot + " Event ID: " + e.getId());
-        // END_DEBUG
+        */
       }
       individuals.add(tt);
       availableTimeSlots.clear();
