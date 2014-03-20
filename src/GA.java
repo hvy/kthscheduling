@@ -31,13 +31,14 @@ public class GA {
     // adjust for the number of soft constraints to be solved too
     // use another stop criteria too, in order to not run forever?
 
+    // initial fitness
     ListIterator<TimeTable> it = population.listIterator();
     while(it.hasNext()) {
       TimeTable tt = it.next();
       fitness(tt);
     }
 
-        // initial sorting
+    // initial sorting
     population.sortIndividuals();
 
     System.out.println("Best fitness: " + 
@@ -550,7 +551,9 @@ public class GA {
               // only check lectures since lecturers are only
               // attached to lecture events
               if (event.getType() == Event.Type.LECTURE) {
-                numBookings++;
+                if (event.getLecturer().getId() == lecturer.getId()) {
+                  numBookings++;
+                }
               }
             }
           }
