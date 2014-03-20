@@ -6,10 +6,10 @@ import java.io.*;
  */
 public class GA {
   private final int DESIRED_FITNESS = 0;
-  private final int MAX_POPULATION_SIZE = 500; // TODO: test different sizes
-  private final int CULLED_POPULATION_SIZE = 30;
+  private final int MAX_POPULATION_SIZE = 30; // TODO: test different sizes
+  private final int CULLED_POPULATION_SIZE = 15;
   private final int CROSSOVER_GENERATION_SIZE = 50;  
-  private final int MUTATION_RATE = 30; // Compared with 1000
+  private final int MUTATION_RATE = 50; // Compared with 1000
 
   private Population population;
   private KTH kth;
@@ -48,7 +48,6 @@ public class GA {
       System.out.println("Best fitness: " + population.getTopIndividual().getFitness());
 
       population = cullPopulation(population);
-      population.sortIndividuals();
       population = breed(population);
       population.sortIndividuals();
 
@@ -223,7 +222,6 @@ public class GA {
     for (int i = 0; i < CULLED_POPULATION_SIZE; i++) {
       culledPopulation.addIndividual(it.next());
     }
-    
     return culledPopulation;
   }
 
@@ -246,8 +244,14 @@ public class GA {
       TimeTable t1 = population.getIndividual(p1);
       TimeTable t2 = population.getIndividual(p2);
       TimeTable child = crossover(t1, t2);
-      mutate(child);
-      repairTimeTable(child);
+      fitness(child);
+      if(child.getFitness() < t1.getFitness() && child.getFitness() < t2.getFitness()) {
+        mutate(child);
+        repairTimeTable(child);
+      } else {
+              mutate(child);
+        repairTimeTable(child);
+      }
       fitness(child);
       population.addIndividual(child);
     }
@@ -376,19 +380,21 @@ public class GA {
     }
   }
 
-  // Fixed mutation rate right now meaning each
-  // individual is mutated slightly
+  //////////////////////////
+  // MUTATION
+  //////////////////////////
+  
   private void mutate(TimeTable tt) {
     //mutateRandomGene(tt);
     mutateSwapGene(tt);
   }
 
-  private void mutateSwapGene(TimeTable tt) {
+  private void mutateRandomGene(TimeTable tt) {
     Random rand = new Random(System.currentTimeMillis());
     RoomTimeTable[] rtts = tt.getRoomTimeTables();
 
     for (int i = 0; i < kth.getNumRooms(); i++) {
-      RoomTimeTable rtt = new RoomTimeTable(rtts[i].getRoom());
+      RoomTimeTable rtt = rtts[i];
 
       // for each available time
       for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS;
@@ -404,13 +410,12 @@ public class GA {
     }
   }
   
-  private void mutateRandomGene(TimeTable tt) {
+  private void mutateSwapGene(TimeTable tt) {
     Random rand = new Random(System.currentTimeMillis());
     RoomTimeTable[] rtts = tt.getRoomTimeTables();
 
     for (int i = 0; i < kth.getNumRooms(); i++) {
-      RoomTimeTable rtt = new RoomTimeTable(rtts[i].getRoom());
-
+      RoomTimeTable rtt = rtts[i];
       // for each available time
       for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS;
                                                             timeslot++) {
@@ -419,29 +424,29 @@ public class GA {
             // mutate this gene
             int swapTargetDay = rand.nextInt(RoomTimeTable.NUM_DAYS);
             int swapTargetTimeslot = rand.nextInt(RoomTimeTable.NUM_TIMESLOTS); 
-            int allele = kth.getRandomEventId(rand);
-            rtt.setEvent(day, timeslot, allele);
+            int swapTargetEventId = rtt.getEvent(swapTargetDay, swapTargetTimeslot);
+            int swapSrcEventId = rtt.getEvent(day, timeslot);
+            rtt.setEvent(swapTargetDay, swapTargetTimeslot, swapSrcEventId);
+            rtt.setEvent(day, timeslot, swapTargetEventId);
           }
         }
       }
     }
   } 
 
+  //////////////////////////
+  // FITNESS
+  //////////////////////////
+
   // Idea for fitness:
   // Each of the softconstraints met should give a positive value
-
   // Each of the hard constraints that are not met should give a negative value
-
   // Each hard constraints negative contribution should be higher than the
   // highest possible sum of the positive contributions of the soft constraints
-
   // A working schedule is then a schedule with positive fitness
   // A higher fitness is more desirable
   private void fitness(TimeTable tt) {
-    long startTime = System.nanoTime();
-    // TODO
     // set the fitness to this time table
-
     int studentGroupDoubleBookings = studentGroupDoubleBookings(tt);
     int lecturerDoubleBookings = lecturerDoubleBookings(tt);
     int roomCapacityBreaches = roomCapacityBreaches(tt);
@@ -452,17 +457,9 @@ public class GA {
                       roomCapacityBreaches +
                       roomTypeBreaches;
 
-    // temporary
-    // simply one minus point for each breach
+    // TODO weight the different constraints breaches
     int fitness = -1 * numBreaches;
-
-    long endTime = System.nanoTime();
-
     tt.setFitness(fitness);
-
-    // temp
-    //System.out.println("Fitness calculated in " + (endTime - startTime) + " ns");
-    //System.out.println(fitness);
   }
 
   //////////////////////////
