@@ -247,8 +247,9 @@ public class GA {
 
       TimeTable child = crossover(t1, t2);
       mutate(child);
+      repairTimeTable(child);
       fitness(child);
-      
+
       population.addIndividual(child);
     }
 
@@ -290,8 +291,6 @@ public class GA {
       child.putRoomTimeTable(i, rtt);
     }
 
-    repairTimeTable(child);
-
     return child;
   }
 
@@ -302,10 +301,81 @@ public class GA {
   }
 
   private void repairTimeTable(TimeTable tt) {
-    // remove double booked events and keep only one
-    // randomly?
+    HashMap<Integer, LinkedList<RoomDayTime>> locations = new HashMap<Integer, 
+                                                    LinkedList<RoomDayTime>>();
+    
+    LinkedList<RoomDayTime> unusedSlots = new LinkedList<RoomDayTime>();
+    
+    // initiate number of bookings to 0
+    for (int eventID : kth.getEvents().keySet()) {
+      locations.put(eventID, new LinkedList<RoomDayTime>());
+    }
 
-    // place unbooked events on free spaces
+    RoomTimeTable[] rtts = tt.getRoomTimeTables();
+
+    for (int i = 0; i < kth.getNumRooms(); i++) {
+      RoomTimeTable rtt = rtts[i];
+      // for each available time
+      for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS;
+                                                     timeslot++) {
+        for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
+          int bookedEvent = rtt.getEvent(day, timeslot);
+          if (bookedEvent == 0) {
+            // add to usable slots
+            unusedSlots.add(new RoomDayTime(i, day, timeslot));
+
+          } else {
+            // save the location
+            locations.get(bookedEvent).add(new RoomDayTime(i, day, timeslot));
+          }
+        }
+      }
+    }
+    
+    List<Integer> unbookedEvents = new LinkedList<Integer>();
+
+    for (int eventID : kth.getEvents().keySet()) {
+      if (locations.get(eventID).size() == 0) {
+        // this event is unbooked
+        unbookedEvents.add(eventID);
+      
+      } else if (locations.get(eventID).size() > 1) {
+        // this is event is booked more than once
+        // randomly make those slots unused until only one remains
+        LinkedList<RoomDayTime> slots = locations.get(eventID);
+        Collections.shuffle(slots);
+        
+        // TODO: this could probably lead to infinite loops if input
+        // data is bad
+        while (slots.size() > 1) {
+          RoomDayTime rdt = slots.removeFirst();
+          
+          // mark this slot as unused
+          unusedSlots.add(rdt);
+          rtts[rdt.room].setEvent(rdt.day, rdt.time, 0);
+        }
+      }
+    }
+
+    // now put each unbooked event in an unused slot
+    Collections.shuffle(unusedSlots);
+    for (int eventID : unbookedEvents) {
+      RoomDayTime rdt = unusedSlots.removeFirst();
+      rtts[rdt.room].setEvent(rdt.day, rdt.time, eventID);
+    }
+  }
+  
+  // wrapper class only used in repair function
+  private class RoomDayTime {
+    int room;
+    int day;
+    int time;
+
+    RoomDayTime(int room, int day, int time) {
+      this.room = room;
+      this.day = day;
+      this.time = time;
+    }
   }
 
   // Fixed mutation rate right now meaning each 
