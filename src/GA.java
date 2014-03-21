@@ -306,6 +306,9 @@ public class GA {
     return null;
   }
 
+  // TODO: write a crossover function that takes half from parent 1
+  // then scans parent2 and adds genevalue if it isnt added yet
+
   private void repairTimeTable(TimeTable tt) {
     HashMap<Integer, LinkedList<RoomDayTime>> locations = new HashMap<Integer, 
                                                     LinkedList<RoomDayTime>>();
