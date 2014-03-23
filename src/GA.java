@@ -1,6 +1,14 @@
 import java.util.*;
 import java.io.*;
 
+/*
+  TODO
+  - New crossover with point
+  - Do not eliminate all bad time tables but letting some join the crossoever
+  - When selecting crossoever parents, use the random wheel
+*/
+
+
 /**
  * Performs the Genetic Algorithm(GA) on the KTH data set.
  */
@@ -9,7 +17,8 @@ public class GA {
   private final int MAX_POPULATION_SIZE = 1000; // TODO: test different sizes
   private final int CULLED_POPULATION_SIZE = 10;
   private final int CROSSOVER_GENERATION_SIZE = 50;  
-  private final int MUTATION_RATE = 50; // Compared with 1000
+  private int MUTATION_PROBABILITY; // Compared with 1000
+  private int CROSSOVER_PROBABILITY;
 
   private Population population;
   private KTH kth;
@@ -47,6 +56,8 @@ public class GA {
     while (population.getTopIndividual().getFitness() < DESIRED_FITNESS) {
       System.out.println("Best fitness: " + population.getTopIndividual().getFitness());
 
+      // select the population used to 
+      //Population selection = selection(population);
       population = cullPopulation(population);
       population = breed(population);
       population.sortIndividuals();
@@ -407,7 +418,7 @@ public class GA {
       for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS;
                                                             timeslot++) {
         for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
-          if (rand.nextInt(1000) < MUTATION_RATE) {
+          if (rand.nextInt(1000) < MUTATION_PROBABILITY) {
             // mutate this gene
             int allele = kth.getRandomEventId(rand);
             rtt.setEvent(day, timeslot, allele);
@@ -427,7 +438,7 @@ public class GA {
       for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS;
                                                             timeslot++) {
         for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
-          if (rand.nextInt(1000) < MUTATION_RATE) {
+          if (rand.nextInt(1000) < MUTATION_PROBABILITY) {
             // mutate this gene
             int swapTargetDay = rand.nextInt(RoomTimeTable.NUM_DAYS);
             int swapTargetTimeslot = rand.nextInt(RoomTimeTable.NUM_TIMESLOTS); 
@@ -784,4 +795,12 @@ public class GA {
   public void printTimeTable(TimeTable tt) {
     kth.printTimeTable(tt);
   }
+  
+  public void setMutationProbability(int p) {
+    MUTATION_PROBABILITY = p;
+  }
+  
+  public void setCrossoverProbability(int p) {
+    CROSSOVER_PROBABILITY = p;
+  }  
 }
