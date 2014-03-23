@@ -18,6 +18,8 @@ public class GUI extends JFrame implements ActionListener {
   JTextField crossoverProbabilityTextField;
   JTextField populationSizeTextField;
   JTextField selectionSizeTextField;
+  JComboBox selectionTypeComboBox;
+  JComboBox mutationTypeComboBox;
 
   // GUI components for debugging
   JButton debugConf;
@@ -37,6 +39,8 @@ public class GUI extends JFrame implements ActionListener {
     crossoverProbabilityTextField = new JTextField("50", 30);
     populationSizeTextField = new JTextField("100", 30);
     selectionSizeTextField = new JTextField("30", 30);
+    selectionTypeComboBox = new JComboBox(GA.SELECTION_TYPE.getNames());
+    mutationTypeComboBox = new JComboBox(GA.MUTATION_TYPE.getNames());
     
     runButton.addActionListener(new ActionListener() {
       @Override
@@ -67,6 +71,10 @@ public class GUI extends JFrame implements ActionListener {
     mainPanel.add(populationSizeTextField);
     mainPanel.add(new JLabel("Culled population size"));    
     mainPanel.add(selectionSizeTextField);
+    mainPanel.add(new JLabel("Selection type"));    
+    mainPanel.add(selectionTypeComboBox);
+    mainPanel.add(new JLabel("Mutation type"));
+    mainPanel.add(mutationTypeComboBox);
     mainPanel.add(runButton);
     // DEBUG
     mainPanel.add(debugConf);
@@ -89,6 +97,8 @@ public class GUI extends JFrame implements ActionListener {
     ga.setCrossoverProbability(Integer.parseInt(crossoverProbabilityTextField.getText()));
     ga.setPopulationSize(Integer.parseInt(populationSizeTextField.getText()));
     ga.setSelectionSize(Integer.parseInt(selectionSizeTextField.getText()));
+    ga.setSelectionType(selectionTypeComboBox.getSelectedIndex());
+    ga.setMutationType(mutationTypeComboBox.getSelectedIndex());
     // run the genetil algorithm
     TimeTable bestTimeTable = ga.generateTimeTable();
     ga.printTimeTable(bestTimeTable);
@@ -105,6 +115,8 @@ public class GUI extends JFrame implements ActionListener {
     ga.setCrossoverProbability(Integer.parseInt(crossoverProbabilityTextField.getText()));
     ga.setPopulationSize(Integer.parseInt(populationSizeTextField.getText()));
     ga.setSelectionSize(Integer.parseInt(selectionSizeTextField.getText()));
+    ga.setSelectionType(selectionTypeComboBox.getSelectedIndex());
+    ga.setMutationType(mutationTypeComboBox.getSelectedIndex());
     ga.printConf();
   }  
 

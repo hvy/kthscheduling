@@ -1,5 +1,8 @@
 import java.util.*;
 import java.io.*;
+import java.lang.*;
+import java.lang.Enum;
+import java.lang.Thread.*;
 
 /*
   TODO
@@ -13,8 +16,33 @@ import java.io.*;
  */
 public class GA {
 
-  public enum SELECTION_TYPE { NORMAL, ROULETTE_WHEEL, TOURNAMENT };
-  public enum MUTATION_TYPE { NORMAL };
+  public enum SELECTION_TYPE { 
+    NORMAL,
+    ROULETTE_WHEEL,
+    TOURNAMENT;
+    
+    public static String[] getNames() {
+      GA.SELECTION_TYPE[] states = values();
+      String[] names = new String[states.length];
+      for (int i = 0; i < states.length; i++) {
+          names[i] = states[i].name();
+      }
+      return names;
+    }
+  };
+  
+  public enum MUTATION_TYPE { 
+    NORMAL;
+    
+    public static String[] getNames() {
+      GA.MUTATION_TYPE[] states = values();
+      String[] names = new String[states.length];
+      for (int i = 0; i < states.length; i++) {
+          names[i] = states[i].name();
+      }
+      return names;
+    }
+  };
 
   // algorithm parameters
   private int DESIRED_FITNESS; 
@@ -855,6 +883,14 @@ public class GA {
   
   public void setSelectionSize(int size) {
     SELECTION_SIZE = size;
+  }
+  
+  public void setMutationType(int i) {
+    mutationType = MUTATION_TYPE.values()[i];
+  }
+  
+  public void setSelectionType(int i) {
+    selectionType = SELECTION_TYPE.values()[i];
   }
     
   // print the given time table in a readable format
