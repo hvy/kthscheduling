@@ -305,8 +305,8 @@ public class GA {
       int p2 = parentIndices.get(1);
       TimeTable t1 = population.getIndividual(p1);
       TimeTable t2 = population.getIndividual(p2);
-      TimeTable child = crossover(t1, t2);
-      //TimeTable child = crossoverWithPoint(t1, t2);
+      //TimeTable child = crossover(t1, t2);
+      TimeTable child = crossoverWithPoint(t1, t2);
 
 			//fitness(child);
       /*
@@ -404,6 +404,8 @@ public class GA {
 
     return child;
   }
+
+	// TODO: add arithmetic and heuristic crossover too?
 
   // TODO: write a crossover function that takes half from parent 1
   // then scans parent2 and adds genevalue if it isnt added yet
