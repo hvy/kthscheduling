@@ -23,7 +23,8 @@ public class GA {
   private int MUTATION_PROBABILITY = 50 ; // compared with 1000
   private int CROSSOVER_PROBABILITY = 50; // compared with 1000
   private int CULLED_POPULATION_SIZE = 20;
-  private SELECTION_TYPE selectionType = SELECTION_TYPE.ROULETTE_WHEEL;
+  //private SELECTION_TYPE selectionType = SELECTION_TYPE.ROULETTE_WHEEL;
+  private SELECTION_TYPE selectionType = SELECTION_TYPE.NORMAL;
   private MUTATION_TYPE mutationType = MUTATION_TYPE.NORMAL;
   
   private Population population;
@@ -305,8 +306,10 @@ public class GA {
       int p2 = parentIndices.get(1);
       TimeTable t1 = population.getIndividual(p1);
       TimeTable t2 = population.getIndividual(p2);
-      TimeTable child = crossover(t1, t2);
-      //fitness(child);
+      //TimeTable child = crossover(t1, t2);
+      TimeTable child = crossoverWithPoint(t1, t2);
+
+			//fitness(child);
       /*
       if(child.getFitness() < t1.getFitness() && child.getFitness() < t2.getFitness()) {
         mutate(child);
@@ -362,10 +365,43 @@ public class GA {
     return child;
   }
 
-  private TimeTable crossoverWithPoints(TimeTable t1, TimeTable t2,
-                                                      int numPoints) {
+	// only one point now
+  private TimeTable crossoverWithPoint(TimeTable t1, TimeTable t2) {
+		TimeTable child = new TimeTable(kth.getNumRooms());
+		
+		int interval = kth.getNumRooms() * RoomTimeTable.NUM_TIMESLOTS * 
+																			 RoomTimeTable.NUM_DAYS;
 
-    return null;
+		int point = new Random(System.currentTimeMillis()).nextInt(interval);
+
+		RoomTimeTable[] rtts1 = t1.getRoomTimeTables();
+		RoomTimeTable[] rtts2 = t2.getRoomTimeTables();
+
+		int gene = 0;
+		
+		// iterate over the genes
+		for (int i = 0; i < kth.getNumRooms(); i++) {
+			RoomTimeTable rtt = new RoomTimeTable(rtts1[i].getRoom());
+			
+			// for each available time
+			for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS;
+																											timeslot++) {
+				for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
+					int allele;
+
+					if (gene < point) {
+						allele = rtts1[i].getEvent(day, timeslot);
+					} else {
+						allele = rtts2[i].getEvent(day, timeslot);
+					}
+
+					rtt.setEvent(day, timeslot, allele);
+					gene++;
+				}
+			}
+		}
+
+    return child;
   }
 
   // TODO: write a crossover function that takes half from parent 1
