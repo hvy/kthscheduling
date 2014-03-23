@@ -255,7 +255,7 @@ public class GA {
         tt = it.next();
         currentFitness += tt.getFitness();
       }
-      it.remove();
+      it.remove();roul
       fitnessSum -= tt.getFitness();
       selection.addIndividual(tt);
     }
