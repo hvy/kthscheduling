@@ -5,8 +5,10 @@ import java.util.ArrayList;
  * Course containing ID and set of events
  */
 public class Course {
+  private static int nextId = 0;
 
-	private String id;
+	private String name;
+	private int id;
 	private int numLectures;
 	private int numLessons;
 	private int numLabs;
@@ -15,15 +17,20 @@ public class Course {
 	 * Course class constructor
 	 * @param id Course ID
 	 */
-	public Course(String id, int numLectures, int numLessons, int numLabs) {
-		this.id = id;
+	public Course(String name, int numLectures, int numLessons, int numLabs) {
+		this.name = name;
 		this.numLectures = numLectures;
 		this.numLessons = numLessons;
 		this.numLabs = numLabs;
+		id = nextId++;		
 	}
 
-  public String getId() {
+  public int getId() {
     return id;
+  }
+
+  public String getName() {
+    return name;
   }
 
 	public int getNumLectures() {
@@ -36,5 +43,9 @@ public class Course {
 
 	public int getNumLabs() {
 		return numLabs;
+	}
+	
+	public void resetId() {
+	  nextId = 0;
 	}
 }

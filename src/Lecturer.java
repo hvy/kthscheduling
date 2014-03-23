@@ -2,7 +2,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class Lecturer {
-  private static int nextID = 0;
+  private static int nextId = 0;
 
   private String name;
   private int id;
@@ -10,7 +10,7 @@ public class Lecturer {
 
   public Lecturer(String name) {
 		this.name = name;
-    this.id = nextID++;
+    id = nextId++;
 		courses = new ArrayList<Course>();
   }
 
@@ -32,10 +32,14 @@ public class Lecturer {
 
   public boolean canTeach(Course course) {
     for (Course c : courses) {
-      if (c.getId().equals(course.getId()))
+      if (c.getName().equals(course.getName()))
         return true;
     }
 
     return false;
+  }
+  
+  public static void resetId() {
+    nextId = 0;
   }
 }

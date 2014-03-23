@@ -29,4 +29,8 @@ public class Room {
 	public Event.Type getType() {
 		return type;
 	}
+	
+	public static void resetId() {
+	  nextId = 0;
+	}
 }

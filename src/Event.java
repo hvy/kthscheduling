@@ -12,12 +12,12 @@ public class Event {
   private final StudentGroup studentGroup;
 
 	public Event(Type t, int size, Lecturer l, Course c, StudentGroup s) {
-    this.id = nextId++;
     this.type = t;
     this.size = size;
     this.lecturer = l;
 		this.course = c;
     this.studentGroup = s;
+    id = nextId++;    
 	}
 
  	public int getId() {
@@ -43,7 +43,11 @@ public class Event {
   public StudentGroup getStudentGroup() {
     return studentGroup;
   }
-
+  
+	public static void resetId() {
+	  nextId = 0;
+	}
+	
 	public static Type generateType(int i) {
 		switch (i) {
 			case 0:

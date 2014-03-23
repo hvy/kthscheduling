@@ -4,14 +4,6 @@ import java.util.*;
 * Represents all the persistent information from the input
 */
 public class KTH {
-
-  // TODO: decide which of these are needed
-  private static int nextRoomId = 0;
-  private static int nextCourseId = 0;
-  private static int nextStudentGroupId = 0;
-  private static int nextLecturerId = 0;
-  private static int nextEventId = 0;
-
   private Map<Integer, Room> rooms;
   private Map<Integer, Course> courses;
   private Map<Integer, StudentGroup> studentGroups;
@@ -44,9 +36,8 @@ public class KTH {
   }
 
   public int addCourse(Course course) {
-    // TODO: use the course's own id here too?
-    courses.put(nextCourseId, course);
-    return nextCourseId++;
+    courses.put(course.getId(), course);
+    return course.getId();
   }
 
   public Map<Integer, Course> getCourses() {
@@ -158,10 +149,23 @@ public class KTH {
     }
   }
   
+  public void clear() {
+    Room.resetId();
+    Event.resetId();
+    Lecturer.resetId();
+    StudentGroup.resetId();
+    rooms.clear();
+    courses.clear();
+    studentGroups.clear();
+    lecturers.clear();
+    events.clear();
+    eventIds.clear();
+  }
+  
   public void printTimeTable(TimeTable tt) {
     StringBuilder sb = new StringBuilder();
     for(RoomTimeTable rtt : tt.getRoomTimeTables()) {
-      sb.append("=====================================================================================================================");    
+      sb.append("========================================");    
       sb.append("Room: " + rtt.getRoom().getName() + " Capacity: " + rtt.getRoom().getCapacity() + "\n");
       for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS; timeslot++) {
         for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {

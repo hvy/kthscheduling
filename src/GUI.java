@@ -4,6 +4,9 @@ import java.awt.event.ActionListener;
 
 public class GUI extends JFrame implements ActionListener {
 
+  // genetic algorithm
+  GA ga;
+
   // GUI properties
   private final String APPLICATION_TITLE = "KTH Scheduler";
   private final int WIDTH = 400;
@@ -12,6 +15,7 @@ public class GUI extends JFrame implements ActionListener {
   // GUI components
   JPanel mainPanel;
   JButton runButton;
+  JButton setupButton;
   JTextField inputDataUrlTextField;
   JTextField constraintsDataUrlTextField;
   JTextField mutationProbabilityTextField;
@@ -21,10 +25,8 @@ public class GUI extends JFrame implements ActionListener {
   JComboBox selectionTypeComboBox;
   JComboBox mutationTypeComboBox;
 
-  // GUI components for debugging
-  JButton debugConf;
-
   public GUI() {
+    ga = new GA();
     init();
   }
   
@@ -32,7 +34,7 @@ public class GUI extends JFrame implements ActionListener {
     // create GUI components
     mainPanel = new JPanel();
     runButton = new JButton("Run");    
-    
+    setupButton = new JButton("Setup");    
     inputDataUrlTextField = new JTextField("../input/ficUni", 30);
     constraintsDataUrlTextField = new JTextField("../input/constraints", 30);
     mutationProbabilityTextField = new JTextField("50", 30);
@@ -42,22 +44,22 @@ public class GUI extends JFrame implements ActionListener {
     selectionTypeComboBox = new JComboBox(GA.SELECTION_TYPE.getNames());
     mutationTypeComboBox = new JComboBox(GA.MUTATION_TYPE.getNames());
     
+    // run button action listener
     runButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent event) {
-         run();
+        run();
       }
     });
     
-    // DEBUG
-    debugConf = new JButton("Check configuration");
-    debugConf.addActionListener(new ActionListener() {
+    // setup button action listener
+    setupButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent event) {
-         printConf();
+        setup();
+        printConf();
       }
     });
-    // 
     
     mainPanel.add(new JLabel("Input file URL"));
     mainPanel.add(inputDataUrlTextField);
@@ -75,10 +77,8 @@ public class GUI extends JFrame implements ActionListener {
     mainPanel.add(selectionTypeComboBox);
     mainPanel.add(new JLabel("Mutation type"));
     mainPanel.add(mutationTypeComboBox);
+    mainPanel.add(setupButton);    
     mainPanel.add(runButton);
-    // DEBUG
-    mainPanel.add(debugConf);
-    //
     add(mainPanel);
     
     setTitle(APPLICATION_TITLE);
@@ -86,10 +86,9 @@ public class GUI extends JFrame implements ActionListener {
     setLocationRelativeTo(null);
     setDefaultCloseOperation(EXIT_ON_CLOSE);
   }
+
   
-  private void run() {
-    GA ga = new GA();
-    
+  private void setup() {    
     // setup the genetic algorithm
     ga.loadData(inputDataUrlTextField.getText());
     ga.loadConstraints(constraintsDataUrlTextField.getText()); // not yet implemented
@@ -98,29 +97,18 @@ public class GUI extends JFrame implements ActionListener {
     ga.setPopulationSize(Integer.parseInt(populationSizeTextField.getText()));
     ga.setSelectionSize(Integer.parseInt(selectionSizeTextField.getText()));
     ga.setSelectionType(selectionTypeComboBox.getSelectedIndex());
-    ga.setMutationType(mutationTypeComboBox.getSelectedIndex());
-    // run the genetil algorithm
-    TimeTable bestTimeTable = ga.generateTimeTable();
-    ga.printTimeTable(bestTimeTable);
+    ga.setMutationType(mutationTypeComboBox.getSelectedIndex());    
   }
   
+  private void run() {
+    TimeTable bestTimeTable = ga.generateTimeTable();
+    ga.printTimeTable(bestTimeTable);
+  }  
   
   private void printConf() {
-    GA ga = new GA();
-    
-    // setup the genetic algorithm
-    ga.loadData(inputDataUrlTextField.getText());
-    ga.loadConstraints(constraintsDataUrlTextField.getText()); // not yet implemented
-    ga.setMutationProbability(Integer.parseInt(mutationProbabilityTextField.getText()));
-    ga.setCrossoverProbability(Integer.parseInt(crossoverProbabilityTextField.getText()));
-    ga.setPopulationSize(Integer.parseInt(populationSizeTextField.getText()));
-    ga.setSelectionSize(Integer.parseInt(selectionSizeTextField.getText()));
-    ga.setSelectionType(selectionTypeComboBox.getSelectedIndex());
-    ga.setMutationType(mutationTypeComboBox.getSelectedIndex());
     ga.printConf();
   }  
 
-  
   @Override
   public void actionPerformed(ActionEvent event) {
   

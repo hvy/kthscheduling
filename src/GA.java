@@ -58,16 +58,12 @@ public class GA {
 
   public GA() {
     kth = new KTH();
-    population = new Population();
   }
 
   /*
   * Returns a schedule based on the given constraints
   */
   public TimeTable generateTimeTable() {
-    // create the initial randomized population
-    kth.createEvents();
-    System.out.println(kth.getEvents().size());
     createPopulation();
     int numberOfGenerations = 1;
 
@@ -140,6 +136,8 @@ public class GA {
   //////////////////////////
 
   public void loadData(String dataFileUrl) {
+    kth.clear(); // reset all previous data before loading
+
     try {
       File file = new File(dataFileUrl);
       BufferedReader in = new BufferedReader(new FileReader(file));
@@ -154,67 +152,35 @@ public class GA {
       String courseName = null;
       String lecturerName = null;
       String studentGroupName = null;
-      int courseId = 0;
       HashMap<String, Integer> courseNameToId = new HashMap<String, Integer>();
       while((line = in.readLine()) != null) {
         String[] data = line.split(" ");
-
         if(data[0].charAt(0) == '#') {
           readingSection = data[1];
           data = in.readLine().split(" ");
         }
-
         if(readingSection.equals("ROOMS")) {
           roomName = data[0];
           int cap = Integer.parseInt(data[1]);
           Event.Type type = Event.generateType(Integer.parseInt(data[2]));
           Room room = new Room(roomName, cap, type);
-          /* DEBUG
-          System.out.println("=== ROOM ===");
-          System.out.println("ID: " + room.getId());
-          System.out.println("Name: " + room.getName());
-          System.out.println("Capacity: " + room.getCapacity());
-          System.out.println("Type: " + room.getType());
-          */
           kth.addRoom(room);
-
         } else if(readingSection.equals("COURSES")) {
           courseName = data[0];
           int numLectures = Integer.parseInt(data[1]);
           int numLessons = Integer.parseInt(data[2]);
           int numLabs = Integer.parseInt(data[3]);
           Course course = new Course(courseName, numLectures, numLessons, numLabs);
-          /* DEBUG
-          System.out.println("=== COURSE ===");
-          System.out.println("ID: " + course.getId());
-          System.out.println("#Lectures: " + course.getNumLectures());
-          System.out.println("#Lessons: " + course.getNumLessons());
-          System.out.println("#Labs: " + course.getNumLabs());
-          */
-          courseId = kth.addCourse(course);
-          courseNameToId.put(courseName, courseId);
-
+          courseNameToId.put(courseName, course.getId());
+          kth.addCourse(course);
         } else if(readingSection.equals("LECTURERS")) {
           lecturerName = data[0];
           Lecturer lecturer = new Lecturer(lecturerName);
-
           for(int i = 1; i < data.length; i++) {
             // register all courses that this lecturer may teach
             courseName = data[i];
-            courseId = courseNameToId.get(courseName);
-            lecturer.addCourse(kth.getCourses().get(courseId));
+            lecturer.addCourse(kth.getCourses().get(courseNameToId.get(courseName)));
           }
-          /* DEBUG
-          System.out.println("=== LECTURER ===");
-          System.out.println("ID: " + lecturer.getId());
-          System.out.println("Name: " + lecturer.getName());
-          System.out.print("Courses: ");
-          List<Course> courses = lecturer.getCourses();
-          for(Course c : courses) {
-            System.out.print(c.getId() + " ");
-          }
-          System.out.println();
-          */
           kth.addLecturer(lecturer);
         } else if(readingSection.equals("STUDENTGROUPS")) {
           studentGroupName = data[0];
@@ -222,18 +188,13 @@ public class GA {
           StudentGroup studentGroup = new StudentGroup(studentGroupName, size);
           for(int i = 2; i < data.length; i++) {
             courseName = data[i];
-            courseId = courseNameToId.get(courseName);
-            studentGroup.addCourse(kth.getCourses().get(courseId));
+            studentGroup.addCourse(kth.getCourses().get(courseNameToId.get(courseName)));
           }
-          /* DEBUG
-          System.out.println("=== STUDENT GROUP ===");
-          System.out.println("ID: " + studentGroup.getId());
-          System.out.println("Name: " + studentGroup.getName());
-          System.out.println("Number of students: " + studentGroup.getSize());
-          */
           kth.addStudentGroup(studentGroup);
         }
       }
+      kth.createEvents(); // create all events
+      in.close();
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     } catch (IOException e) {
@@ -254,6 +215,7 @@ public class GA {
   //////////////////////////
 
   private void createPopulation() {
+    population = new Population();
     population.createRandomIndividuals(MAX_POPULATION_SIZE, kth);
   }
   
@@ -292,6 +254,8 @@ public class GA {
         tt = it.next();
         currentFitness += tt.getFitness();
       }
+      it.remove();
+      fitnessSum -= tt.getFitness();
       selection.addIndividual(tt);
     }
     return selection;

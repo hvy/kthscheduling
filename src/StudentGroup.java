@@ -36,4 +36,8 @@ public class StudentGroup {
 	public List<Course> getCourses() {
 		return courses;
 	}
+	
+	public static void resetId() {
+	  nextId = 0;
+	}
 }
