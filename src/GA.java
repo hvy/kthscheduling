@@ -305,8 +305,8 @@ public class GA {
       int p2 = parentIndices.get(1);
       TimeTable t1 = population.getIndividual(p1);
       TimeTable t2 = population.getIndividual(p2);
-      //TimeTable child = crossover(t1, t2);
-      TimeTable child = crossoverWithPoint(t1, t2);
+      TimeTable child = crossover(t1, t2);
+      //TimeTable child = crossoverWithPoint(t1, t2);
 
 			//fitness(child);
       /*
@@ -398,6 +398,8 @@ public class GA {
 					gene++;
 				}
 			}
+
+			child.putRoomTimeTable(i, rtt);
 		}
 
     return child;
