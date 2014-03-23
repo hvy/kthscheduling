@@ -16,13 +16,12 @@ public class GA {
   public enum SELECTION_TYPE { NORMAL, ROULETTE_WHEEL, TOURNAMENT };
   public enum MUTATION_TYPE { NORMAL };
 
-  // algorithm parameters with default settings
-  private int DESIRED_FITNESS = 0;
-  private int CROSSOVER_GENERATION_SIZE = 50;    
-  private int MAX_POPULATION_SIZE = 100;
-  private int MUTATION_PROBABILITY = 50 ; // compared with 1000
-  private int CROSSOVER_PROBABILITY = 50; // compared with 1000
-  private int CULLED_POPULATION_SIZE = 20;
+  // algorithm parameters
+  private int DESIRED_FITNESS; 
+  private int MAX_POPULATION_SIZE;
+  private int MUTATION_PROBABILITY; // compared with 1000
+  private int CROSSOVER_PROBABILITY; // compared with 1000
+  private int SELECTION_SIZE;
   private SELECTION_TYPE selectionType = SELECTION_TYPE.ROULETTE_WHEEL;
   private MUTATION_TYPE mutationType = MUTATION_TYPE.NORMAL;
   
@@ -256,12 +255,12 @@ public class GA {
 
     // randomize fitness value deciding which individuals to select      
     Random rand = new Random(System.currentTimeMillis());
-    for (int i = 0; i < CULLED_POPULATION_SIZE; i++) {
+    for (int i = 0; i < SELECTION_SIZE; i++) {
       int randomFitness = -1 * rand.nextInt(-1 * fitnessSum); 
       int currentFitness = 0;
       it = population.listIterator();
       TimeTable tt = null;   
-      while(currentFitness > randomFitness) {
+      while(currentFitness >= randomFitness) {
         tt = it.next();
         currentFitness += tt.getFitness();
       }
@@ -281,7 +280,7 @@ public class GA {
     // take the top half of population
     // assumes individuals are sorted
     Random rand = new Random();
-    for (int i = 0; i < CULLED_POPULATION_SIZE; i++) {
+    for (int i = 0; i < SELECTION_SIZE; i++) {
       culledPopulation.addIndividual(it.next());
     }
     return culledPopulation;
@@ -293,7 +292,7 @@ public class GA {
     Random rand = new Random(System.currentTimeMillis());
     List<Integer> parentIndices = new ArrayList<Integer>();
     
-    for (int i = 0; i < CULLED_POPULATION_SIZE; i++) {
+    for (int i = 0; i < SELECTION_SIZE; i++) {
       parentIndices.add(i);
     }
 
@@ -842,11 +841,6 @@ public class GA {
     return 0.0;
   }
   
-  // print the given time table in a readable format
-  public void printTimeTable(TimeTable tt) {
-    kth.printTimeTable(tt);
-  }
-  
   public void setMutationProbability(int p) {
     MUTATION_PROBABILITY = p;
   }
@@ -859,7 +853,22 @@ public class GA {
     MAX_POPULATION_SIZE = size;
   }
   
-  public void setCulledPopulationSize(int size) {
-    CULLED_POPULATION_SIZE = size;
+  public void setSelectionSize(int size) {
+    SELECTION_SIZE = size;
+  }
+    
+  // print the given time table in a readable format
+  public void printTimeTable(TimeTable tt) {
+    kth.printTimeTable(tt);
+  }
+  
+  public void printConf() {
+    System.out.println("Desired fitness: " + DESIRED_FITNESS);
+    System.out.println("Population size: " + MAX_POPULATION_SIZE);
+    System.out.println("Selection size: " + SELECTION_SIZE);
+    System.out.println("Mutation type: " + mutationType);    
+    System.out.println("P(Mutation) = " + ((double)MUTATION_PROBABILITY / 1000.0d) + "%");
+    System.out.println("Selection type: " + selectionType);
+    System.out.println("P(Crossover) = " + ((double)CROSSOVER_PROBABILITY / 1000.0d) + "%");
   }
 }

@@ -17,7 +17,10 @@ public class GUI extends JFrame implements ActionListener {
   JTextField mutationProbabilityTextField;
   JTextField crossoverProbabilityTextField;
   JTextField populationSizeTextField;
-  JTextField culledPopulationSizeTextField;
+  JTextField selectionSizeTextField;
+
+  // GUI components for debugging
+  JButton debugConf;
 
   public GUI() {
     init();
@@ -33,7 +36,7 @@ public class GUI extends JFrame implements ActionListener {
     mutationProbabilityTextField = new JTextField("50", 30);
     crossoverProbabilityTextField = new JTextField("50", 30);
     populationSizeTextField = new JTextField("100", 30);
-    culledPopulationSizeTextField = new JTextField("30", 30);
+    selectionSizeTextField = new JTextField("30", 30);
     
     runButton.addActionListener(new ActionListener() {
       @Override
@@ -41,6 +44,16 @@ public class GUI extends JFrame implements ActionListener {
          run();
       }
     });
+    
+    // DEBUG
+    debugConf = new JButton("Check configuration");
+    debugConf.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent event) {
+         printConf();
+      }
+    });
+    // 
     
     mainPanel.add(new JLabel("Input file URL"));
     mainPanel.add(inputDataUrlTextField);
@@ -53,8 +66,11 @@ public class GUI extends JFrame implements ActionListener {
     mainPanel.add(new JLabel("Population size"));    
     mainPanel.add(populationSizeTextField);
     mainPanel.add(new JLabel("Culled population size"));    
-    mainPanel.add(culledPopulationSizeTextField);
+    mainPanel.add(selectionSizeTextField);
     mainPanel.add(runButton);
+    // DEBUG
+    mainPanel.add(debugConf);
+    //
     add(mainPanel);
     
     setTitle(APPLICATION_TITLE);
@@ -72,11 +88,26 @@ public class GUI extends JFrame implements ActionListener {
     ga.setMutationProbability(Integer.parseInt(mutationProbabilityTextField.getText()));
     ga.setCrossoverProbability(Integer.parseInt(crossoverProbabilityTextField.getText()));
     ga.setPopulationSize(Integer.parseInt(populationSizeTextField.getText()));
-    ga.setCulledPopulationSize(Integer.parseInt(culledPopulationSizeTextField.getText()));
+    ga.setSelectionSize(Integer.parseInt(selectionSizeTextField.getText()));
     // run the genetil algorithm
     TimeTable bestTimeTable = ga.generateTimeTable();
     ga.printTimeTable(bestTimeTable);
   }
+  
+  
+  private void printConf() {
+    GA ga = new GA();
+    
+    // setup the genetic algorithm
+    ga.loadData(inputDataUrlTextField.getText());
+    ga.loadConstraints(constraintsDataUrlTextField.getText()); // not yet implemented
+    ga.setMutationProbability(Integer.parseInt(mutationProbabilityTextField.getText()));
+    ga.setCrossoverProbability(Integer.parseInt(crossoverProbabilityTextField.getText()));
+    ga.setPopulationSize(Integer.parseInt(populationSizeTextField.getText()));
+    ga.setSelectionSize(Integer.parseInt(selectionSizeTextField.getText()));
+    ga.printConf();
+  }  
+
   
   @Override
   public void actionPerformed(ActionEvent event) {
