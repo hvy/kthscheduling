@@ -8,18 +8,24 @@ import java.io.*;
   - When selecting crossoever parents, use the random wheel
 */
 
-
 /**
  * Performs the Genetic Algorithm(GA) on the KTH data set.
  */
 public class GA {
-  private final int DESIRED_FITNESS = 0;
-  private final int MAX_POPULATION_SIZE = 1000; // TODO: test different sizes
-  private final int CULLED_POPULATION_SIZE = 10;
-  private final int CROSSOVER_GENERATION_SIZE = 50;  
-  private int MUTATION_PROBABILITY; // Compared with 1000
-  private int CROSSOVER_PROBABILITY;
 
+  public enum SELECTION_TYPE { NORMAL, ROULETTE_WHEEL, TOURNAMENT };
+  public enum MUTATION_TYPE { NORMAL };
+
+  // algorithm parameters with default settings
+  private int DESIRED_FITNESS = 0;
+  private int CROSSOVER_GENERATION_SIZE = 50;    
+  private int MAX_POPULATION_SIZE = 100;
+  private int MUTATION_PROBABILITY = 50 ; // compared with 1000
+  private int CROSSOVER_PROBABILITY = 50; // compared with 1000
+  private int CULLED_POPULATION_SIZE = 20;
+  private SELECTION_TYPE selectionType = SELECTION_TYPE.ROULETTE_WHEEL;
+  private MUTATION_TYPE mutationType = MUTATION_TYPE.NORMAL;
+  
   private Population population;
   private KTH kth;
 
@@ -54,12 +60,13 @@ public class GA {
     population.sortIndividuals();
     
     while (population.getTopIndividual().getFitness() < DESIRED_FITNESS) {
-      System.out.println("Best fitness: " + population.getTopIndividual().getFitness());
-
-      // select the population used to 
-      //Population selection = selection(population);
-      population = cullPopulation(population);
+      // select the population used for the crossover
+      population = selection(population);
+      
+      // add new individuals to the population using crossover
       population = breed(population);
+      
+      // sort the population by their fitness
       population.sortIndividuals();
 
       // TODO //////////////
@@ -221,6 +228,50 @@ public class GA {
 
   private void createPopulation() {
     population.createRandomIndividuals(MAX_POPULATION_SIZE, kth);
+  }
+  
+  private Population selection(Population population) {
+    switch(selectionType) {
+      case ROULETTE_WHEEL:
+        return rouletteWheelSelection(population);
+      case TOURNAMENT:
+        return tournamentSelection(population);
+      case NORMAL:
+        return cullPopulation(population);
+      default:
+        break;
+    }
+    return null;
+  }
+  
+  private Population rouletteWheelSelection(Population population) {
+    Population selection = new Population();
+    ListIterator<TimeTable> it = population.listIterator();
+
+    // sum the total fitness of all individuals in the population
+    int fitnessSum = 0;
+    while(it.hasNext()) {
+      fitnessSum += it.next().getFitness();
+    }
+
+    // randomize fitness value deciding which individuals to select      
+    Random rand = new Random(System.currentTimeMillis());
+    for (int i = 0; i < CULLED_POPULATION_SIZE; i++) {
+      int randomFitness = -1 * rand.nextInt(-1 * fitnessSum); 
+      int currentFitness = 0;
+      it = population.listIterator();
+      TimeTable tt = null;   
+      while(currentFitness > randomFitness) {
+        tt = it.next();
+        currentFitness += tt.getFitness();
+      }
+      selection.addIndividual(tt);
+    }
+    return selection;
+  }
+  
+  private Population tournamentSelection(Population population) {
+    return null;
   }
 
   private Population cullPopulation(Population population) {
@@ -803,4 +854,12 @@ public class GA {
   public void setCrossoverProbability(int p) {
     CROSSOVER_PROBABILITY = p;
   }  
+  
+  public void setPopulationSize(int size) {
+    MAX_POPULATION_SIZE = size;
+  }
+  
+  public void setCulledPopulationSize(int size) {
+    CULLED_POPULATION_SIZE = size;
+  }
 }

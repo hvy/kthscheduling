@@ -6,8 +6,8 @@ public class GUI extends JFrame implements ActionListener {
 
   // GUI properties
   private final String APPLICATION_TITLE = "KTH Scheduler";
-  private final int WIDTH = 300;
-  private final int HEIGHT = 300;
+  private final int WIDTH = 400;
+  private final int HEIGHT = 400;
 
   // GUI components
   JPanel mainPanel;
@@ -17,6 +17,7 @@ public class GUI extends JFrame implements ActionListener {
   JTextField mutationProbabilityTextField;
   JTextField crossoverProbabilityTextField;
   JTextField populationSizeTextField;
+  JTextField culledPopulationSizeTextField;
 
   public GUI() {
     init();
@@ -27,11 +28,12 @@ public class GUI extends JFrame implements ActionListener {
     mainPanel = new JPanel();
     runButton = new JButton("Run");    
     
-    inputDataUrlTextField = new JTextField("../input/ficUni", 20);
-    constraintsDataUrlTextField = new JTextField("../input/constraints", 20);
-    mutationProbabilityTextField = new JTextField("Mutation probability", 10);
-    crossoverProbabilityTextField = new JTextField("Crossover probability", 10);
-    populationSizeTextField = new JTextField("Population size", 10);
+    inputDataUrlTextField = new JTextField("../input/ficUni", 30);
+    constraintsDataUrlTextField = new JTextField("../input/constraints", 30);
+    mutationProbabilityTextField = new JTextField("50", 30);
+    crossoverProbabilityTextField = new JTextField("50", 30);
+    populationSizeTextField = new JTextField("100", 30);
+    culledPopulationSizeTextField = new JTextField("30", 30);
     
     runButton.addActionListener(new ActionListener() {
       @Override
@@ -40,11 +42,18 @@ public class GUI extends JFrame implements ActionListener {
       }
     });
     
+    mainPanel.add(new JLabel("Input file URL"));
     mainPanel.add(inputDataUrlTextField);
+    mainPanel.add(new JLabel("Constraints file URL"));
     mainPanel.add(constraintsDataUrlTextField);
+    mainPanel.add(new JLabel("Mutation probability"));
     mainPanel.add(mutationProbabilityTextField);
+    mainPanel.add(new JLabel("Crossover probability"));
     mainPanel.add(crossoverProbabilityTextField);
-    mainpanel.add(populationSizeTextField);
+    mainPanel.add(new JLabel("Population size"));    
+    mainPanel.add(populationSizeTextField);
+    mainPanel.add(new JLabel("Culled population size"));    
+    mainPanel.add(culledPopulationSizeTextField);
     mainPanel.add(runButton);
     add(mainPanel);
     
@@ -62,7 +71,8 @@ public class GUI extends JFrame implements ActionListener {
     ga.loadConstraints(constraintsDataUrlTextField.getText()); // not yet implemented
     ga.setMutationProbability(Integer.parseInt(mutationProbabilityTextField.getText()));
     ga.setCrossoverProbability(Integer.parseInt(crossoverProbabilityTextField.getText()));
-    
+    ga.setPopulationSize(Integer.parseInt(populationSizeTextField.getText()));
+    ga.setCulledPopulationSize(Integer.parseInt(culledPopulationSizeTextField.getText()));
     // run the genetil algorithm
     TimeTable bestTimeTable = ga.generateTimeTable();
     ga.printTimeTable(bestTimeTable);
