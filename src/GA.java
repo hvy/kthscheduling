@@ -91,9 +91,15 @@ public class GA {
 
     int numGenerations = 1;
     while (population.getTopIndividual().getFitness() < DESIRED_FITNESS) {
-      population = selection(population); // select the population used for the crossover
-      population = breed(population); // add new individuals to the population using crossover
-      population.sortIndividuals(); // sort the population by their fitness
+      // select the population used for the crossover
+      population = selection(population); 
+      
+      // add new individuals to the population using crossover
+      population = breed(population); 
+      
+      // sort the population by their fitness
+      population.sortIndividuals(); 
+      
       numGenerations++;
       System.out.println("#GENERATIONS: " + numGenerations + " BEST FITNESS: " + population.getTopIndividual().getFitness());
     }
@@ -342,8 +348,9 @@ public class GA {
       TimeTable t2 = population.getIndividual(p2);
       //TimeTable child = crossover(t1, t2);
       TimeTable child = crossoverWithPoint(t1, t2);
-
-			//fitness(child);
+      //TimeTable child = crossoverWithTwoPoints(t1, t2);
+			
+      //fitness(child);
       /*
       if(child.getFitness() < t1.getFitness() && child.getFitness() < t2.getFitness()) {
         mutate(child);
@@ -436,6 +443,58 @@ public class GA {
 
 			child.putRoomTimeTable(i, rtt);
 		}
+
+    return child;
+  }
+
+  private TimeTable crossoverWithTwoPoints(TimeTable t1, TimeTable t2) {
+    // TODO: should be two children?
+    TimeTable child = new TimeTable(kth.getNumRooms());
+
+		int interval = kth.getNumRooms() * RoomTimeTable.NUM_TIMESLOTS *
+																			 RoomTimeTable.NUM_DAYS;
+
+    Random rand = new Random(System.currentTimeMillis());
+		int p1 = rand.nextInt(interval);
+    int p2 = rand.nextInt(interval);
+
+    if (p1 > p2) {
+      // swap them
+      int tmp = p2;
+      p2 = p1;
+      p1 = tmp;
+    }
+
+		RoomTimeTable[] rtts1 = t1.getRoomTimeTables();
+		RoomTimeTable[] rtts2 = t2.getRoomTimeTables();
+
+		int gene = 0;
+
+		// iterate over the genes
+		for (int i = 0; i < kth.getNumRooms(); i++) {
+			RoomTimeTable rtt = new RoomTimeTable(rtts1[i].getRoom());
+
+			// for each available time
+			for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS;
+																											timeslot++) {
+				for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
+          int allele;
+
+          if (gene > p1 && gene < p2) {
+            allele = rtts2[i].getEvent(day, timeslot);
+          
+          } else {
+            allele = rtts1[i].getEvent(day, timeslot);
+          }
+
+          rtt.setEvent(day, timeslot, allele);
+
+          gene++;
+        }
+      }
+
+      child.putRoomTimeTable(i, rtt);
+    }
 
     return child;
   }
@@ -590,7 +649,9 @@ public class GA {
   // A higher fitness is more desirable
   private void fitness(TimeTable tt) {
     // set the fitness to this time table
-    int studentGroupDoubleBookings = studentGroupDoubleBookings(tt);
+    //int studentGroupDoubleBookings = studentGroupDoubleBookings(tt);
+    int studentGroupDoubleBookings = studentGroupDoubleBookings2(tt);
+    
     int lecturerDoubleBookings = lecturerDoubleBookings(tt);
     int roomCapacityBreaches = roomCapacityBreaches(tt);
     int roomTypeBreaches = roomTypeBreaches(tt);
@@ -640,66 +701,78 @@ public class GA {
 
   // num times a studentgroup is double booked
   // OPTIMIZE: just iterate over the rooms once instead?
-  private int studentGroupDoubleBookingsOld(TimeTable tt) {
+  private int studentGroupDoubleBookings2(TimeTable tt) {
     int numBreaches = 0;
 
     RoomTimeTable[] rtts = tt.getRoomTimeTables();
 
-    for (StudentGroup sg : kth.getStudentGroups().values()) {
+    for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS;
+                                                        timeslot++) {
+      for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
+        for (StudentGroup sg : kth.getStudentGroups().values()) {
+          
+          // TODO: use array instead of map
+          // the array should be of size equal to the total
+          // amount of eventgroups and needs to be reset for the next 
+          // studentgroup
+          HashMap<Integer, Integer> eventGroupCounts = 
+          new HashMap<Integer, Integer>();
 
-      // for each time
-      for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS; timeslot++) {
-        for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
-          int numDoubleBookings = 0;
-
-          boolean evTypeSet = false;
-          Event.Type eventType = null;
           for (RoomTimeTable rtt : rtts) {
             int eventID = rtt.getEvent(day, timeslot);
 
-            // 0 is unbooked
+            // only look at booked timeslots
             if (eventID != 0) {
               Event event = kth.getEvent(eventID);
               int sgID = event.getStudentGroup().getId();
-
+              
+              // if this bookings is for the current studentgroup
               if (sgID == sg.getId()) {
-
-                if (!evTypeSet) {
-                  // first one
-                  eventType = event.getType();
-                  evTypeSet = true;
-
+                // TODO: räkna antalet av alla eventgroupids?
+                // antag att den som har flest är "rätt"
+                // resten är då fel
+                
+                int eventGroupID = event.getEventGroupId();
+                
+                // increment the count for this event group id
+                if (!eventGroupCounts.containsKey(eventGroupID)) {
+                  eventGroupCounts.put(eventGroupID, 1);
+                
                 } else {
-                  // TODO: om den första är en lab/lesson
-                  // och en lecture är inbokad i ett senare rum
-                  // kommer antalet double bookings vara fel
-
-                  if (eventType == Event.Type.LECTURE) {
-                    numDoubleBookings++;
-
-                  } else if (eventType != event.getType()) {
-                    numDoubleBookings++;
-
-                  } else {
-                    // labs and classes may be double booked
-                    // to account for the extra events created for each studentgroup
-                    // for each lesson/lab
-                  }
+                  int oldCount = eventGroupCounts.get(eventGroupID);
+                  eventGroupCounts.put(eventGroupID, oldCount + 1);
                 }
               }
             }
           }
+          
+          // find the biggest event group
+          int biggestGroup; 
+          int biggestGroupSize = 0;
+          int sumGroupSize = 0;
+          for (Map.Entry<Integer, Integer> entry : 
+                                  eventGroupCounts.entrySet()) {
+            
+            sumGroupSize += entry.getValue();
 
-          if (numDoubleBookings > 0) {
-            numBreaches += numDoubleBookings;
+            if (entry.getValue() > biggestGroupSize) {
+              biggestGroup = entry.getKey();
+              biggestGroupSize = entry.getValue();
+            }
           }
+
+          numBreaches += sumGroupSize - biggestGroupSize;
         }
       }
     }
 
     return numBreaches;
   }
-
+  
+  // TODO: with this code it is possible for a course
+  // to have many of its lessons or labs at the same time
+  // possible fix: group events created from the same lesson/lab
+  // with an id or something
   private int studentGroupDoubleBookings(TimeTable tt) {
     int numBreaches = 0;
 
@@ -736,10 +809,6 @@ public class GA {
               }
             }
           }
-
-          // TODO: how do we calculate the number of breaches here?
-          // if for example numLectures == 1, should the rest be violations?
-          // or
 
           int max = max(numLectures, numLessons, numLabs);
 
@@ -878,7 +947,6 @@ public class GA {
 
           // only look at booked timeslots
           if (eventID != 0) {
-            // TODO: find the type of the event booked here
             Event.Type type = kth.getEvent(eventID).getType();
             if (roomType != type) {
               numBreaches++;

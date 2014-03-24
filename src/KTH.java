@@ -75,6 +75,9 @@ public class KTH {
   }
 
   public void createEvents() {
+    // event group ids are unique
+    int eventGroupID = 1;
+
     for (StudentGroup sg : studentGroups.values()) {
       for (Course course : sg.getCourses()) {
         
@@ -82,6 +85,10 @@ public class KTH {
         for (int i = 0; i < course.getNumLectures(); i++) {
           // find a lecturer for this course
           // TODO: put lecturers on the course object instead?
+          // TODO: should the choosing of lecturer be randomised?
+          // and there should probably be a soft constraint for
+          // having the same lecturer for a studentgroup/course combination
+          // for each of their lectures
           List<Lecturer> possibleLecturers = new ArrayList<Lecturer>();
           for (Lecturer lecturer : lecturers.values()) {
             if (lecturer.canTeach(course)) {
@@ -94,10 +101,14 @@ public class KTH {
                                   sg.getSize(),
                                   possibleLecturers.get(0),
                                   course,
-                                  sg);
+                                  sg,
+                                  eventGroupID);
 
           events.put(event.getId(), event);
           eventIds.add(event.getId());
+
+          // update event group id
+          eventGroupID++;
         }
         
         // TODO: should maxsize of a subgroup be 40? to fit in the rooms
@@ -116,13 +127,17 @@ public class KTH {
                                     evSize,
                                     null, // should this be null or some default TA value?
                                     course,
-                                    sg);
+                                    sg,
+                                    eventGroupID);
 
             events.put(event.getId(), event);
             eventIds.add(event.getId());
             sgSize = sgSize - evSize;
 
           }
+
+          // update event group id
+          eventGroupID++;
         }
         
         // TODO: is this size good?
@@ -138,12 +153,16 @@ public class KTH {
                                     evSize,
                                     null,
                                     course,
-                                    sg);
+                                    sg,
+                                    eventGroupID);
 
             events.put(event.getId(), event);
             eventIds.add(event.getId());
             sgSize = sgSize - evSize;
           }
+
+          // update event group id
+          eventGroupID++;
         }
       }
     }

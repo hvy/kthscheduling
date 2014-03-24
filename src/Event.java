@@ -6,23 +6,30 @@ public class Event {
 	
   private final Type type;
 	private final int id;
+  private final int eventGroupId;
   private final int size;
   private final Lecturer lecturer;
 	private final Course course;
   private final StudentGroup studentGroup;
 
-	public Event(Type t, int size, Lecturer l, Course c, StudentGroup s) {
+	public Event(Type t, int size, Lecturer l, Course c, StudentGroup s,
+                                                      int eventGroupId) {
     this.type = t;
     this.size = size;
     this.lecturer = l;
 		this.course = c;
     this.studentGroup = s;
-    id = nextId++;    
+    id = nextId++;
+    this.eventGroupId = eventGroupId;
 	}
 
  	public int getId() {
 		return id;
 	}
+
+  public int getEventGroupId() {
+    return eventGroupId;
+  }
 
   public int getSize() {
     return size;
@@ -45,7 +52,7 @@ public class Event {
   }
   
 	public static void resetId() {
-	  nextId = 0;
+	  nextId = 1;
 	}
 	
 	public static Type generateType(int i) {
