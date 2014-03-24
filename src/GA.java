@@ -7,8 +7,18 @@ import java.lang.Thread.*;
 /*
   TODO
   - New crossover with point
+  - Keep bad individuals to next generation
   - Do not eliminate all bad time tables but letting some join the crossoever
   - When selecting crossoever parents, use the random wheel
+
+        // TODO: optimize the check of double bookings by only iterating over
+      // the roomtimetables only once,
+      // fast functions are important to GA, since they are slow
+
+      // TODO: a lab or class for a course should result in several events
+      // when checking if a studentgroup is double booked
+      // it should be allowed to have a studentgroup id double booked
+      // if the double bookings are class or lab
 */
 
 /**
@@ -16,11 +26,11 @@ import java.lang.Thread.*;
  */
 public class GA {
 
-  public enum SELECTION_TYPE { 
+  public enum SELECTION_TYPE {
     NORMAL,
     ROULETTE_WHEEL,
     TOURNAMENT;
-    
+
     public static String[] getNames() {
       GA.SELECTION_TYPE[] states = values();
       String[] names = new String[states.length];
@@ -30,10 +40,10 @@ public class GA {
       return names;
     }
   };
-  
-  public enum MUTATION_TYPE { 
+
+  public enum MUTATION_TYPE {
     NORMAL;
-    
+
     public static String[] getNames() {
       GA.MUTATION_TYPE[] states = values();
       String[] names = new String[states.length];
@@ -45,15 +55,15 @@ public class GA {
   };
 
   // algorithm parameters
-  private int DESIRED_FITNESS; 
+  private int DESIRED_FITNESS;
   private int MAX_POPULATION_SIZE;
   private int MUTATION_PROBABILITY; // compared with 1000
   private int CROSSOVER_PROBABILITY; // compared with 1000
   private int SELECTION_SIZE;
-//  private SELECTION_TYPE selectionType = SELECTION_TYPE.ROULETTE_WHEEL;
+  private int TOURNAMENT_POOL_SIZE = 5;
   private SELECTION_TYPE selectionType = SELECTION_TYPE.NORMAL;
   private MUTATION_TYPE mutationType = MUTATION_TYPE.NORMAL;
-  
+
   private Population population;
   private KTH kth;
 
@@ -65,68 +75,27 @@ public class GA {
   * Returns a schedule based on the given constraints
   */
   public TimeTable generateTimeTable() {
-    createPopulation();
-    int numberOfGenerations = 1;
-
     // run until the fitness is high enough
     // high enough should at least mean that
     // all hard constraints are solved
     // adjust for the number of soft constraints to be solved too
     // use another stop criteria too, in order to not run forever?
 
-    // initial fitness
+    // create the initial random population
+    createRandomPopulation();
     ListIterator<TimeTable> it = population.listIterator();
     while(it.hasNext()) {
       TimeTable tt = it.next();
       fitness(tt);
     }
-    // initial sorting
-    population.sortIndividuals();
-    
+
+    int numGenerations = 1;
     while (population.getTopIndividual().getFitness() < DESIRED_FITNESS) {
-      // select the population used for the crossover
-      population = selection(population);
-      
-      // add new individuals to the population using crossover
-      population = breed(population);
-      
-      // sort the population by their fitness
-      population.sortIndividuals();
-
-      // TODO //////////////
-      // have small chance of keeping a bad one
-      // different chances for different intervals of fitness
-
-      // check whether java random is good enough
-
-      // save some of the good parent as well
-
-      // output information?
-
-      // TODO: test fitness function time early
-
-      // TODO: make roomtimetable inner structure to a vector instead
-      // should make it faster
-
-      // TODO: optimize the check of double bookings by only iterating over
-      // the roomtimetables only once,
-      // fast functions are important to GA, since they are slow
-
-      // TODO: a lab or class for a course should result in several events
-      // when checking if a studentgroup is double booked
-      // it should be allowed to have a studentgroup id double booked
-      // if the double bookings are class or lab
-      
-      /* DEBUG
-      TimeTable bestTimeTable = population.getTopIndividual();
-      for(RoomTimeTable rtt : bestTimeTable.getRoomTimeTables()) {
-        System.out.println("=============================================");
-        System.out.println(rtt);
-      }
-      END_DEBUG */
-      numberOfGenerations++;
-      System.out.println("Number of generations: " + numberOfGenerations);
-      System.out.println(population.getTopIndividual().getFitness());
+      population = selection(population); // select the population used for the crossover
+      population = breed(population); // add new individuals to the population using crossover
+      population.sortIndividuals(); // sort the population by their fitness
+      numGenerations++;
+      System.out.println("NUMBER OF GENERATIONS: " + numGenerations + " BEST FITNESS: " + population.getTopIndividual().getFitness());
     }
     return population.getTopIndividual();
   }
@@ -204,66 +173,137 @@ public class GA {
   }
 
   public void loadConstraints(String constraintsFileUrl) {
-    // read the input file and
-    // add all data to the kth object
+    // TODO read constraints from a file
   }
-
-  // TODO: do we need to check that the input data
-  // is valid? maybe later?
 
   //////////////////////////
   // GENETIC ALGORITHMS
   //////////////////////////
 
-  private void createPopulation() {
+  private Population createRandomPopulation() {
     population = new Population();
     population.createRandomIndividuals(MAX_POPULATION_SIZE, kth);
+    return population;
   }
-  
+
   private Population selection(Population population) {
     switch(selectionType) {
       case ROULETTE_WHEEL:
+        //population.sortIndividuals();
         return rouletteWheelSelection(population);
       case TOURNAMENT:
+        //population.sortIndividuals();
         return tournamentSelection(population);
       case NORMAL:
+        population.sortIndividuals();
         return cullPopulation(population);
       default:
         break;
     }
     return null;
   }
-  
+
   private Population rouletteWheelSelection(Population population) {
     Population selection = new Population();
     ListIterator<TimeTable> it = population.listIterator();
 
-    // sum the total fitness of all individuals in the population
-    int fitnessSum = 0;
+    double fitnessSum = 0.0d;
+    double fitnessSums[] = new double[population.size()];
+    fitnessSums[0] = it.next().getFitness();
+
+    int i = 1;
     while(it.hasNext()) {
-      fitnessSum += it.next().getFitness();
+      double fitness = it.next().getFitness();
+      fitnessSums[i] = fitnessSums[i-1] + fitness;
+      i++;
     }
 
-    // randomize fitness value deciding which individuals to select      
+    Random rand = new Random(System.currentTimeMillis());
+    for(int j = 0; j < SELECTION_SIZE; j++) {
+      double randomFitness = rand.nextDouble() * fitnessSums[fitnessSums.length-1];
+      int index = Arrays.binarySearch(fitnessSums, randomFitness);
+      // adjust negative insertion points
+      if(index < 0) {
+        index = Math.abs(index+1);
+      } if (index >= MAX_POPULATION_SIZE) {
+        index = MAX_POPULATION_SIZE - 1;
+      }
+      selection.addIndividual(population.getIndividual(index));
+    }
+
+    /*
+    // randomize fitness value deciding which individuals to select
     Random rand = new Random(System.currentTimeMillis());
     for (int i = 0; i < SELECTION_SIZE; i++) {
-      int randomFitness = -1 * rand.nextInt(-1 * fitnessSum); 
+      int randomFitness = -1 * rand.nextInt(-1 * fitnessSum);
       int currentFitness = 0;
       it = population.listIterator();
-      TimeTable tt = null;   
+      TimeTable tt = null;
       while(currentFitness >= randomFitness) {
         tt = it.next();
         currentFitness += tt.getFitness();
       }
-      it.remove();roul
+      it.remove();
       fitnessSum -= tt.getFitness();
+      System.out.println("Added TimeTable: " + tt.getFitness());
       selection.addIndividual(tt);
+      System.out.println("Selection size: " + selection.size());
     }
+    */
     return selection;
   }
-  
+
   private Population tournamentSelection(Population population) {
-    return null;
+    Population selection = new Population();
+    ListIterator<TimeTable> it = population.listIterator();
+
+    Random rand = new Random(System.currentTimeMillis());
+    List<Integer> poolIndices = new ArrayList<Integer>();
+    for (int i = 0; i < MAX_POPULATION_SIZE; i++) {
+      poolIndices.add(i);
+    }
+
+    while(selection.size() < SELECTION_SIZE) {
+      Population pool = new Population();
+      Collections.shuffle(poolIndices);
+      int i = 0;
+      while(pool.size() < TOURNAMENT_POOL_SIZE) {
+        pool.addIndividual(population.getIndividual(poolIndices.get(i)));
+      }
+      pool.sortIndividuals();
+      selection.addIndividual(pool.getTopIndividual());
+    }
+
+    /*
+    while (selection.size() < SELECTION_SIZE) {
+      Collections.shuffle(poolIndices);
+      int cId1 = poolIndices.get(0);
+      int cId2 = poolIndices.get(1);
+      TimeTable c1 = population.getIndividual(cId1);
+      TimeTable c2 = population.getIndividual(cId2);
+      int winnerId = cId1;
+      TimeTable winner = c1;
+      if(c2.getFitness() > c1.getFitness()) {
+        winnerId = cId2;
+        winner = c2;
+      }
+      poolIndices.remove((Integer)winnerId);
+      selection.addIndividual(winner);
+    }
+    */
+
+      /*
+      Population pool = new Population();
+      for(int i = 0; i < TOURNAMENT_POOL_SIZE; i++) {
+        int id = poolIndices.get(i);
+        TimeTable tt = population.getIndividual(id);
+        pool.addIndividual(tt);
+      }
+      pool.sortIndividuals();
+      selection.addIndividual(pool.getBestIndividual());
+      poolIndices.remove(new Integer(pool.getBestIndividual().getId()));
+      */
+    return selection;
   }
 
   private Population cullPopulation(Population population) {
@@ -274,7 +314,8 @@ public class GA {
     // assumes individuals are sorted
     Random rand = new Random();
     for (int i = 0; i < SELECTION_SIZE; i++) {
-      culledPopulation.addIndividual(it.next());
+      TimeTable tt = it.next();
+      culledPopulation.addIndividual(tt);
     }
     return culledPopulation;
   }
@@ -284,7 +325,7 @@ public class GA {
   private Population breed(Population population) {
     Random rand = new Random(System.currentTimeMillis());
     List<Integer> parentIndices = new ArrayList<Integer>();
-    
+
     for (int i = 0; i < SELECTION_SIZE; i++) {
       parentIndices.add(i);
     }
@@ -333,7 +374,7 @@ public class GA {
       RoomTimeTable rtt = new RoomTimeTable(rtts1[i].getRoom());
 
       // for each available time
-      for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS; 
+      for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS;
                                                             timeslot++) {
         for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
           int allele;
@@ -359,8 +400,8 @@ public class GA {
 	// only one point now
   private TimeTable crossoverWithPoint(TimeTable t1, TimeTable t2) {
 		TimeTable child = new TimeTable(kth.getNumRooms());
-		
-		int interval = kth.getNumRooms() * RoomTimeTable.NUM_TIMESLOTS * 
+
+		int interval = kth.getNumRooms() * RoomTimeTable.NUM_TIMESLOTS *
 																			 RoomTimeTable.NUM_DAYS;
 
 		int point = new Random(System.currentTimeMillis()).nextInt(interval);
@@ -369,11 +410,11 @@ public class GA {
 		RoomTimeTable[] rtts2 = t2.getRoomTimeTables();
 
 		int gene = 0;
-		
+
 		// iterate over the genes
 		for (int i = 0; i < kth.getNumRooms(); i++) {
 			RoomTimeTable rtt = new RoomTimeTable(rtts1[i].getRoom());
-			
+
 			// for each available time
 			for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS;
 																											timeslot++) {
@@ -403,11 +444,11 @@ public class GA {
   // then scans parent2 and adds genevalue if it isnt added yet
 
   private void repairTimeTable(TimeTable tt) {
-    HashMap<Integer, LinkedList<RoomDayTime>> locations = new HashMap<Integer, 
+    HashMap<Integer, LinkedList<RoomDayTime>> locations = new HashMap<Integer,
                                                     LinkedList<RoomDayTime>>();
-    
+
     LinkedList<RoomDayTime> unusedSlots = new LinkedList<RoomDayTime>();
-    
+
     // initiate number of bookings to 0
     for (int eventID : kth.getEvents().keySet()) {
       locations.put(eventID, new LinkedList<RoomDayTime>());
@@ -433,25 +474,25 @@ public class GA {
         }
       }
     }
-    
+
     List<Integer> unbookedEvents = new LinkedList<Integer>();
 
     for (int eventID : kth.getEvents().keySet()) {
       if (locations.get(eventID).size() == 0) {
         // this event is unbooked
         unbookedEvents.add(eventID);
-      
+
       } else if (locations.get(eventID).size() > 1) {
         // this is event is booked more than once
         // randomly make those slots unused until only one remains
         LinkedList<RoomDayTime> slots = locations.get(eventID);
         Collections.shuffle(slots);
-        
+
         // TODO: this could probably lead to infinite loops if input
         // data is bad
         while (slots.size() > 1) {
           RoomDayTime rdt = slots.removeFirst();
-          
+
           // mark this slot as unused
           unusedSlots.add(rdt);
           rtts[rdt.room].setEvent(rdt.day, rdt.time, 0);
@@ -466,7 +507,7 @@ public class GA {
       rtts[rdt.room].setEvent(rdt.day, rdt.time, eventID);
     }
   }
-  
+
   // wrapper class only used in repair function
   private class RoomDayTime {
     int room;
@@ -483,7 +524,7 @@ public class GA {
   //////////////////////////
   // MUTATION
   //////////////////////////
-  
+
   private void mutate(TimeTable tt) {
     //mutateRandomGene(tt);
     mutateSwapGene(tt);
@@ -509,7 +550,7 @@ public class GA {
       }
     }
   }
-  
+
   private void mutateSwapGene(TimeTable tt) {
     Random rand = new Random(System.currentTimeMillis());
     RoomTimeTable[] rtts = tt.getRoomTimeTables();
@@ -523,7 +564,7 @@ public class GA {
           if (rand.nextInt(1000) < MUTATION_PROBABILITY) {
             // mutate this gene
             int swapTargetDay = rand.nextInt(RoomTimeTable.NUM_DAYS);
-            int swapTargetTimeslot = rand.nextInt(RoomTimeTable.NUM_TIMESLOTS); 
+            int swapTargetTimeslot = rand.nextInt(RoomTimeTable.NUM_TIMESLOTS);
             int swapTargetEventId = rtt.getEvent(swapTargetDay, swapTargetTimeslot);
             int swapSrcEventId = rtt.getEvent(day, timeslot);
             rtt.setEvent(swapTargetDay, swapTargetTimeslot, swapSrcEventId);
@@ -532,7 +573,7 @@ public class GA {
         }
       }
     }
-  } 
+  }
 
   //////////////////////////
   // FITNESS
@@ -557,13 +598,15 @@ public class GA {
                       roomCapacityBreaches * 4 +
                       roomTypeBreaches * 4;
 
+    /* DEBUG
     System.out.println("=============================================");
     System.out.println(
-      studentGroupDoubleBookings + " " + 
+      studentGroupDoubleBookings + " " +
       lecturerDoubleBookings + " " +
       roomCapacityBreaches + " " +
       roomTypeBreaches
       );
+    */
 
     // TODO weight the different constraints breaches
     int fitness = -1 * numBreaches;
@@ -590,7 +633,7 @@ public class GA {
 
   // TODO: will this be needed?
   private int eventDoubleBooked(TimeTable tt) {
-    
+
 
     return 0;
   }
@@ -672,7 +715,7 @@ public class GA {
 
           for (RoomTimeTable rtt : rtts) {
             int eventID = rtt.getEvent(day, timeslot);
-            
+
             // only look at booked timeslots
             if (eventID != 0) {
               Event event = kth.getEvent(eventID);
@@ -682,7 +725,7 @@ public class GA {
                 Event.Type eventType = event.getType();
                 if (eventType == Event.Type.LECTURE) {
                   numLectures++;
-                
+
                 } else if (eventType == Event.Type.LESSON) {
                   numLessons++;
 
@@ -697,11 +740,11 @@ public class GA {
           // TODO: how do we calculate the number of breaches here?
           // if for example numLectures == 1, should the rest be violations?
           // or
-          
+
           int max = max(numLectures, numLessons, numLabs);
 
           if (max == numLessons) {
-            numBreaches += numLectures + numLabs;            
+            numBreaches += numLectures + numLabs;
 
           } else if (max == numLabs) {
             numBreaches += numLectures + numLessons;
@@ -714,7 +757,7 @@ public class GA {
               } else {
                 numBreaches += numLectures + numLessons;
               }
-            
+
             } else {
               numBreaches += numLectures - 1;
             }
@@ -728,11 +771,11 @@ public class GA {
 
   private int max(int a, int b, int c) {
     int max = a;
-    
+
     if (b > max) {
       max = b;
     }
-    
+
     if (c > max) {
       max = c;
     }
@@ -872,41 +915,41 @@ public class GA {
     // räkna antal håltimmar?
     return 0.0;
   }
-  
+
   public void setMutationProbability(int p) {
     MUTATION_PROBABILITY = p;
   }
-  
+
   public void setCrossoverProbability(int p) {
     CROSSOVER_PROBABILITY = p;
-  }  
-  
+  }
+
   public void setPopulationSize(int size) {
     MAX_POPULATION_SIZE = size;
   }
-  
+
   public void setSelectionSize(int size) {
     SELECTION_SIZE = size;
   }
-  
+
   public void setMutationType(int i) {
     mutationType = MUTATION_TYPE.values()[i];
   }
-  
+
   public void setSelectionType(int i) {
     selectionType = SELECTION_TYPE.values()[i];
   }
-    
+
   // print the given time table in a readable format
   public void printTimeTable(TimeTable tt) {
     kth.printTimeTable(tt);
   }
-  
+
   public void printConf() {
     System.out.println("Desired fitness: " + DESIRED_FITNESS);
     System.out.println("Population size: " + MAX_POPULATION_SIZE);
     System.out.println("Selection size: " + SELECTION_SIZE);
-    System.out.println("Mutation type: " + mutationType);    
+    System.out.println("Mutation type: " + mutationType);
     System.out.println("P(Mutation) = " + ((double)MUTATION_PROBABILITY / 1000.0d) + "%");
     System.out.println("Selection type: " + selectionType);
     System.out.println("P(Crossover) = " + ((double)CROSSOVER_PROBABILITY / 1000.0d) + "%");
