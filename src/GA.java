@@ -95,7 +95,7 @@ public class GA {
       population = breed(population); // add new individuals to the population using crossover
       population.sortIndividuals(); // sort the population by their fitness
       numGenerations++;
-      System.out.println("NUMBER OF GENERATIONS: " + numGenerations + " BEST FITNESS: " + population.getTopIndividual().getFitness());
+      System.out.println("#GENERATIONS: " + numGenerations + " BEST FITNESS: " + population.getTopIndividual().getFitness());
     }
     return population.getTopIndividual();
   }
@@ -207,6 +207,7 @@ public class GA {
     Population selection = new Population();
     ListIterator<TimeTable> it = population.listIterator();
 
+    /*
     double fitnessSum = 0.0d;
     double fitnessSums[] = new double[population.size()];
     fitnessSums[0] = it.next().getFitness();
@@ -230,26 +231,27 @@ public class GA {
       }
       selection.addIndividual(population.getIndividual(index));
     }
+    */
 
-    /*
+    int fitnessSum = 0;
+    while(it.hasNext()) {
+      fitnessSum += it.next().getFitness();
+    }
     // randomize fitness value deciding which individuals to select
     Random rand = new Random(System.currentTimeMillis());
     for (int i = 0; i < SELECTION_SIZE; i++) {
-      int randomFitness = -1 * rand.nextInt(-1 * fitnessSum);
-      int currentFitness = 0;
       it = population.listIterator();
-      TimeTable tt = null;
+      TimeTable tt = it.next();
+      int randomFitness = -1 * rand.nextInt(-1 * fitnessSum);
+      int currentFitness = tt.getFitness();
       while(currentFitness >= randomFitness) {
         tt = it.next();
         currentFitness += tt.getFitness();
       }
-      it.remove();
       fitnessSum -= tt.getFitness();
-      System.out.println("Added TimeTable: " + tt.getFitness());
       selection.addIndividual(tt);
-      System.out.println("Selection size: " + selection.size());
+      it.remove();
     }
-    */
     return selection;
   }
 
@@ -633,8 +635,6 @@ public class GA {
 
   // TODO: will this be needed?
   private int eventDoubleBooked(TimeTable tt) {
-
-
     return 0;
   }
 
