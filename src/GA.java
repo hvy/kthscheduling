@@ -1,8 +1,5 @@
 import java.util.*;
 import java.io.*;
-import java.lang.*;
-import java.lang.Enum;
-import java.lang.Thread.*;
 
 /*
   TODO
@@ -69,6 +66,69 @@ public class GA {
 
   public GA() {
     kth = new KTH();
+  }
+
+  // only use this with the test input
+  public void testConstraints() {
+    loadData("../input/TestConstraintsInput");
+    
+    // create one timetable manually
+    TimeTable tt = new TimeTable(2);
+    
+    Room r1 = kth.getRooms().get(0);
+    Room r2 = kth.getRooms().get(1);
+
+    RoomTimeTable rtt1 = new RoomTimeTable(r1);
+    RoomTimeTable rtt2 = new RoomTimeTable(r2);
+
+    tt.putRoomTimeTable(0, rtt1);
+    tt.putRoomTimeTable(1, rtt2);
+    
+    // events, ids start at 1
+    // there are 8 events with this input
+    Event lectureEvent = kth.getEvents().get(1);
+
+    Event lessonEvent1 = kth.getEvents().get(2);
+    Event lessonEvent2 = kth.getEvents().get(3);
+    Event lessonEvent3 = kth.getEvents().get(4);
+    
+    Event labEvent1 = kth.getEvents().get(5);
+    Event labEvent2 = kth.getEvents().get(6);
+    Event labEvent3 = kth.getEvents().get(7);
+    Event labEvent4 = kth.getEvents().get(8);
+
+    // book the events
+
+    // lecture in too small lecture hall, 1 capacity error
+    rtt2.setEvent(0, 0, lectureEvent.getId());
+
+    // student group double booked with the lecture, 1 sg double booking
+    rtt1.setEvent(0, 0, lessonEvent1.getId());
+    
+    // two lessons "double booked" for a student group
+    // should not give sg double booking error
+    rtt2.setEvent(0, 1, lessonEvent2.getId());
+    rtt1.setEvent(0, 1, lessonEvent3.getId());
+    
+    rtt2.setEvent(4, 0, labEvent1.getId());
+    rtt2.setEvent(4, 1, labEvent2.getId());
+    rtt2.setEvent(4, 2, labEvent3.getId());
+    rtt2.setEvent(4, 3, labEvent4.getId());
+
+    // expected: 
+    // 1 sg double booking
+    // 0 lecturer double bookings, since only one lecture
+    // 1 capacity breach, lecture in too small lecture hall
+    // 7 type breaches, only lecture halls and 7 labs/lessons events
+
+    System.out.println("Studentgroup doublebookings: " + studentGroupDoubleBookings2(tt));
+    System.out.println("Lecturer doublebookings: " + lecturerDoubleBookings(tt));
+    System.out.println("Room capacity breaches: " + roomCapacityBreaches(tt));
+    System.out.println("Room type breaches: " + roomTypeBreaches(tt));
+  }
+
+  public static void main(String[] args) {
+    (new GA()).testConstraints();
   }
 
   /*
@@ -670,7 +730,8 @@ public class GA {
       roomTypeBreaches
       );
     */
-
+    
+    // TODO: add in the soft constraints
     // TODO weight the different constraints breaches
     int fitness = -1 * numBreaches;
     tt.setFitness(fitness);
@@ -698,7 +759,8 @@ public class GA {
   private int eventDoubleBooked(TimeTable tt) {
     return 0;
   }
-
+  
+  // TODO: This version is the working one, remove the other one
   // num times a studentgroup is double booked
   // OPTIMIZE: just iterate over the rooms once instead?
   private int studentGroupDoubleBookings2(TimeTable tt) {
@@ -769,6 +831,8 @@ public class GA {
     return numBreaches;
   }
   
+  // TODO: This version should be removed, the problem is solved
+  // in the version above
   // TODO: with this code it is possible for a course
   // to have many of its lessons or labs at the same time
   // possible fix: group events created from the same lesson/lab
