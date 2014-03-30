@@ -73,6 +73,10 @@ public class Population {
     return individuals.get(0);
   }
 
+  public TimeTable getWorstIndividual() {
+    return individuals.getLast();
+  }
+
   public void addIndividual(TimeTable tt) {
     individuals.add(tt);
   }

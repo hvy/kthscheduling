@@ -36,7 +36,8 @@ public class TimeTable implements Comparable<TimeTable> {
 
     return sb.toString();
   }
-
+  
+  // sorts descending
   @Override
   public int compareTo(TimeTable other) {
     int otherFitness = other.getFitness();

@@ -67,7 +67,8 @@ public class GA {
   public GA() {
     kth = new KTH();
   }
-
+  
+  //////////////////////////////////////
   // only use this with the test input
   public void testConstraints() {
     loadData("../input/TestConstraintsInput");
@@ -130,6 +131,7 @@ public class GA {
   public static void main(String[] args) {
     (new GA()).testConstraints();
   }
+  ///////////////////////////////////////////////////
 
   /*
   * Returns a schedule based on the given constraints
@@ -149,20 +151,36 @@ public class GA {
       fitness(tt);
     }
 
+    population.sortIndividuals();
+
     int numGenerations = 1;
     while (population.getTopIndividual().getFitness() < DESIRED_FITNESS) {
+      /*
       // select the population used for the crossover
       population = selection(population); 
       
       // add new individuals to the population using crossover
       population = breed(population); 
+      */
       
+      ///*
+      Population children = breed3(population, MAX_POPULATION_SIZE / 2);
+      //System.out.println("breed done");
+
+      population = selection3(population, children);
+      //System.out.println("selection done");
+      //*/
+
+      //Population children = breed3(population, MAX_POPULATION_SIZE / 2);
+      //population = selection3(population, children);
+
       // sort the population by their fitness
       population.sortIndividuals(); 
       
       numGenerations++;
       System.out.println("#GENERATIONS: " + numGenerations + " BEST FITNESS: " + population.getTopIndividual().getFitness());
     }
+
     return population.getTopIndividual();
   }
 
@@ -427,6 +445,185 @@ public class GA {
     }
     return population;
   }
+
+  //////////////////////////////
+  private Population breed2(Population population, int N) {
+    Population children = new Population();
+    
+    // calculate the pseudofitness of each individual
+    // used in the roulette selection
+    int[] pseudoFitness = new int[population.size()];
+    int smallestFitness = population.getWorstIndividual().getFitness();
+    smallestFitness = smallestFitness >= 0 ? 0 : smallestFitness;
+    
+    // the pseudo fitnesses are in reversed order
+    int i = population.size() - 1;
+    ListIterator<TimeTable> it = population.listIterator();
+    while (it.hasNext()) {
+      pseudoFitness[i] = it.next().getFitness() + -1 * smallestFitness;
+      i--;
+    }
+    
+    // calculate the accumulated values
+    for (int j = 1; j < pseudoFitness.length; j++) {
+      pseudoFitness[j] += pseudoFitness[j-1];
+    }
+
+    int fitnessSum = pseudoFitness[pseudoFitness.length - 1];
+    
+    /*
+    System.out.println("fitnes sum: " + fitnessSum);
+    for (i = 0; i < pseudoFitness.length; i++) {
+      System.out.println(pseudoFitness[i]);
+    }
+    */
+    
+    Random rand = new Random(System.currentTimeMillis());
+
+    // create N children
+    while (children.size() < N) {
+      int r = rand.nextInt(fitnessSum + 1);
+      int pfIndex1 = Arrays.binarySearch(pseudoFitness, r);
+
+      //System.out.println("r: " + r);
+
+      if (pfIndex1 < 0) {
+        pfIndex1 += 1;
+        pfIndex1 = pfIndex1 * -1;
+      }
+      
+      //System.out.println("pfindex1: " + pfIndex1);
+      
+      r = rand.nextInt(fitnessSum + 1);
+      int pfIndex2 = Arrays.binarySearch(pseudoFitness, r);
+      
+      //System.out.println("r: " + r);
+
+      if (pfIndex2 < 0) {
+        pfIndex2 += 1;
+        pfIndex2 = pfIndex2 * -1;
+      }
+
+      //System.out.println("pfindex2: " + pfIndex2);
+      
+      // translate indexes back to population index
+      int p1 = pseudoFitness.length - 1 - pfIndex1;
+      int p2 = pseudoFitness.length - 1 - pfIndex2;
+
+      //System.out.println("p1: " + p1);
+      //System.out.println("p2: " + p2);
+      
+      // temp
+      //System.exit(0);
+
+      TimeTable t1 = population.getIndividual(p1);
+      TimeTable t2 = population.getIndividual(p2);
+
+      // cross over the parent and add to children
+      TimeTable child = crossoverWithPoint(t1, t2);
+      mutate(child);
+      repairTimeTable(child);
+      fitness(child);
+      children.addIndividual(child);
+    }
+
+    return children;
+  }
+
+  private TimeTable rouletteSelect(Population population, int[] pseudoFitness,
+                                                 int fitnessSum, Random rand) {
+    
+    int r = rand.nextInt(fitnessSum + 1);
+    int sum = 0;
+
+    ListIterator<TimeTable> it = population.listIterator();
+
+    int i = 0;
+    while (it.hasNext()) {
+      TimeTable tt = it.next();
+      sum += pseudoFitness[i];
+      i++;
+
+      if (sum >= r) {
+        return tt;
+      }
+    }
+
+    return null;
+  }
+
+  private TimeTable next(ListIterator<TimeTable> it) {
+    return it.hasNext() ? it.next() : null;
+  }
+
+  /////////////////////////////
+  
+  // creates a new population by mating parent from the
+  // top part of the population randomly
+  private Population breed3(Population population, int N) {
+    Population children = new Population();
+
+    List<Integer> parentIndices = new ArrayList<Integer>();
+
+    for (int i = 0; i < SELECTION_SIZE; i++) {
+      parentIndices.add(i);
+    }
+    
+    // create N children
+    while (children.size() < N) {
+      Collections.shuffle(parentIndices);
+      int p1 = parentIndices.get(0);
+      int p2 = parentIndices.get(1);
+      
+      TimeTable t1 = population.getIndividual(p1);
+      TimeTable t2 = population.getIndividual(p2);
+      
+      TimeTable child = crossoverWithPoint(t1, t2);
+      mutate(child);
+      repairTimeTable(child);
+      fitness(child);
+
+      children.addIndividual(child);
+    }
+
+    return children;
+  }
+
+  private Population selection3(Population population, Population children) {
+    // population is already sorted
+    children.sortIndividuals(); 
+
+    Population nextPopulation = new Population();
+
+    ListIterator<TimeTable> itParents = population.listIterator();
+    ListIterator<TimeTable> itChildren = children.listIterator();
+    TimeTable nextParent = itParents.next();
+    TimeTable nextChild = itChildren.next();
+
+    while (nextPopulation.size() < MAX_POPULATION_SIZE) {
+      if (nextChild != null) {
+        if (nextChild.getFitness() > nextParent.getFitness()) {
+          nextPopulation.addIndividual(nextChild);
+
+          nextChild = next(itChildren);
+        
+        } else {
+          nextPopulation.addIndividual(nextParent);
+
+          nextParent = next(itParents);
+        }
+      
+      } else {
+        // add the rest from population
+        nextPopulation.addIndividual(nextParent);
+        nextParent = next(itParents);
+      }
+    }
+
+    return nextPopulation;
+  }
+
+  /////////////////////////////
 
   // For each gene (booking in a timeslot), take with equal
   // probability from either parent
