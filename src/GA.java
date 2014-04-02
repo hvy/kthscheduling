@@ -16,6 +16,11 @@ import java.io.*;
       // when checking if a studentgroup is double booked
       // it should be allowed to have a studentgroup id double booked
       // if the double bookings are class or lab
+
+      // TODO: the list of individuals in population probably shouldnt be a 
+      // linked list but rather an arraylist since we have a fixed size anyway
+      // and we are not using any linkedlistspecific features other than list
+      // iterator which properties are not used anyway
 */
 
 /**
@@ -164,7 +169,8 @@ public class GA {
       */
       
       ///*
-      Population children = breed3(population, MAX_POPULATION_SIZE / 2);
+      //Population children = breed3(population, MAX_POPULATION_SIZE / 2);
+      Population children = breed4(population, MAX_POPULATION_SIZE / 2);
       //System.out.println("breed done");
 
       population = selection3(population, children);
@@ -449,6 +455,17 @@ public class GA {
   //////////////////////////////
   private Population breed2(Population population, int N) {
     Population children = new Population();
+
+    // a better way could be to generate an array with
+    // elements pointing to a certain individual on
+    // k indexes where k corresponds to the probability
+    // that that individual should be picked
+    // a,b,c individuals
+    // [a,a,a,a,b,b,b,c] => 50% a, 3/8 b, 1/8 c
+    // this would make it constant in the loop to pick a random invidual
+    // rather than log n as it is now with binarysearch
+
+    // look up alias method for discrete probability distribution
     
     // calculate the pseudofitness of each individual
     // used in the roulette selection
@@ -471,13 +488,6 @@ public class GA {
 
     int fitnessSum = pseudoFitness[pseudoFitness.length - 1];
     
-    /*
-    System.out.println("fitnes sum: " + fitnessSum);
-    for (i = 0; i < pseudoFitness.length; i++) {
-      System.out.println(pseudoFitness[i]);
-    }
-    */
-    
     Random rand = new Random(System.currentTimeMillis());
 
     // create N children
@@ -485,37 +495,23 @@ public class GA {
       int r = rand.nextInt(fitnessSum + 1);
       int pfIndex1 = Arrays.binarySearch(pseudoFitness, r);
 
-      //System.out.println("r: " + r);
-
       if (pfIndex1 < 0) {
         pfIndex1 += 1;
         pfIndex1 = pfIndex1 * -1;
       }
       
-      //System.out.println("pfindex1: " + pfIndex1);
-      
       r = rand.nextInt(fitnessSum + 1);
       int pfIndex2 = Arrays.binarySearch(pseudoFitness, r);
       
-      //System.out.println("r: " + r);
-
       if (pfIndex2 < 0) {
         pfIndex2 += 1;
         pfIndex2 = pfIndex2 * -1;
       }
-
-      //System.out.println("pfindex2: " + pfIndex2);
       
       // translate indexes back to population index
       int p1 = pseudoFitness.length - 1 - pfIndex1;
       int p2 = pseudoFitness.length - 1 - pfIndex2;
-
-      //System.out.println("p1: " + p1);
-      //System.out.println("p2: " + p2);
       
-      // temp
-      //System.exit(0);
-
       TimeTable t1 = population.getIndividual(p1);
       TimeTable t2 = population.getIndividual(p2);
 
@@ -563,7 +559,7 @@ public class GA {
   private Population breed3(Population population, int N) {
     Population children = new Population();
 
-    List<Integer> parentIndices = new ArrayList<Integer>();
+    List<Integer> parentIndices = new LinkedList<Integer>();
 
     for (int i = 0; i < SELECTION_SIZE; i++) {
       parentIndices.add(i);
@@ -589,6 +585,180 @@ public class GA {
     return children;
   }
 
+  // uses another implementation of roulette selection of parents
+  private Population breed4(Population population, int N) {
+    Population children = new Population();
+
+    // calculate the pseudofitness of each individual
+    // used in the roulette selection
+    int[] pseudoFitness = new int[population.size()];
+    int smallestFitness = population.getWorstIndividual().getFitness();
+    smallestFitness = smallestFitness >= 0 ? 0 : smallestFitness;
+    
+    int i = 0;
+    ListIterator<TimeTable> it = population.listIterator();
+    int fitnessSum = 0;
+    while (it.hasNext()) {
+      // the smallest possible is 1, this saves us from weird behavious in
+      // cases where all individuals have the same fitness
+      pseudoFitness[i] = it.next().getFitness() + -1 * smallestFitness + 1;
+      fitnessSum += pseudoFitness[i];
+      i++;
+    }
+
+    // if fitnessSum too low simply take from the top of the individuals
+    // otherwise we end up taking the same parents all the time and
+    // even just one parent twice to create one child which is bad
+
+    // temp value
+    if (fitnessSum < 0) {
+      //System.out.println("USING TOP PARENTS UNIFORMLY");
+
+      List<Integer> parentIndices = new LinkedList<Integer>();
+
+      for (int j = 0; j < SELECTION_SIZE; j++) {
+        parentIndices.add(j);
+      }
+      
+      // create N children
+      while (children.size() < N) {
+        Collections.shuffle(parentIndices);
+        int p1 = parentIndices.get(0);
+        int p2 = parentIndices.get(1);
+        
+        TimeTable t1 = population.getIndividual(p1);
+        TimeTable t2 = population.getIndividual(p2);
+        
+        TimeTable child = crossoverWithPoint(t1, t2);
+        mutate(child);
+        repairTimeTable(child);
+        fitness(child);
+
+        children.addIndividual(child);
+      }
+    
+    } else {
+        //System.out.println("USING ROULETTE SELECTION OF PARENTS");
+        
+        // TODO: another idea is to make the individuals with
+        // pseudo fitness 0 to have pseudopseudo fitness 1
+        // so that they could be chosen as well
+        // would have to change the fitness sum in that case
+
+        // create alias index
+        int[] alias = new int[fitnessSum];
+        
+        // add the individual indexes a proportionate amount of times 
+        int aliasIndex = 0;
+        it = population.listIterator();
+        for (int individual = 0; individual < population.size(); individual++) {
+          for (int j = 0; j < pseudoFitness[individual]; j++) {
+            alias[aliasIndex] = individual;
+            aliasIndex++;
+          }
+        }
+        
+        Random rand = new Random(System.currentTimeMillis());
+        
+        while (children.size() < N) {
+          // TODO: is this right?
+          if (alias.length == 0) {
+            break;
+          }
+
+          int pi1 = alias[rand.nextInt(alias.length)];
+          
+          // find the sections before and after the chosen individuals index
+          // and for the second parent take an individual from either of
+          // those sections
+
+          // we need to remove the probability to pick the same
+          // which can be done by adding indexes to the other individuals
+          // a proportional amount of times
+
+          // alias = [____222_____]
+          // find the two spans and take a random number from either of them
+          
+          /*
+          int aliasIndex = 0;
+          int i0 = 0;
+
+          // find the first index
+          while (aliasIndex < alias.length && alias[aliasIndex] != pi1) {
+            aliasIndex++;
+          }
+
+          int i1 = aliasIndex - 1;
+  
+          // find the second index
+          while (aliasIndex < alias.length && alias[aliasIndex] == pi1) {
+            aliasIndex++;
+          }
+
+          int i2 = aliasIndex;
+          int i3 = alias.length - 1;
+
+          int aIndex;
+
+          // since we add 1 to each individuals pseudofitness
+          // we can not have a case where there is a 100% probability
+          // to take a certain individual
+          //.. i think
+
+          if (i1 < 0) {
+            // only use the second span
+            aIndex = rand.nextInt(i3 - i2 + 1) + i2;
+
+          } else if (i2 > i3) {
+            // only use the fist span
+            aIndex = rand.nextInt(i1 + 1);
+          
+          } else {
+            // use both spans
+
+          }*/
+
+          int numPi1 = pseudoFitness[pi1];
+          int aIndex = rand.nextInt(alias.length - numPi1);
+
+          int ai = 0;
+          int j = 0;
+          //System.out.println("alias len: " + alias.length);
+          //System.out.println("aIndex: " + aIndex);
+          for (; j < alias.length && ai < aIndex; j++) {
+            // skip ahead if we are at the span of the first parent's index
+            while (j < (alias.length - 1) && alias[j] == pi1) {
+              j++; 
+            }
+
+            ai++;
+          }
+          
+          //j = j >= alias.length ? alias.length  - 1: j;
+
+          int pi2 = alias[j];
+          
+          // TODO: this happens alot at the end
+          // needs to be fixed
+          if (pi1 == pi2) {
+            System.out.println("SAME PARENTS!");
+          }
+
+          TimeTable t1 = population.getIndividual(pi1);
+          TimeTable t2 = population.getIndividual(pi2);
+
+          TimeTable child = crossoverWithPoint(t1, t2);
+          mutate(child);
+          repairTimeTable(child);
+          fitness(child);
+
+          children.addIndividual(child);
+        }
+    }
+    
+    return children;
+  }
+
   private Population selection3(Population population, Population children) {
     // population is already sorted
     children.sortIndividuals(); 
@@ -597,8 +767,8 @@ public class GA {
 
     ListIterator<TimeTable> itParents = population.listIterator();
     ListIterator<TimeTable> itChildren = children.listIterator();
-    TimeTable nextParent = itParents.next();
-    TimeTable nextChild = itChildren.next();
+    TimeTable nextParent = next(itParents);
+    TimeTable nextChild = next(itChildren);
 
     while (nextPopulation.size() < MAX_POPULATION_SIZE) {
       if (nextChild != null) {
@@ -614,9 +784,13 @@ public class GA {
         }
       
       } else {
-        // add the rest from population
-        nextPopulation.addIndividual(nextParent);
-        nextParent = next(itParents);
+          // we shouldnt have to test if this is null
+          // since the nextPopulation should already be full
+          if (nextParent != null) {
+            // add the rest from population
+            nextPopulation.addIndividual(nextParent);
+            nextParent = next(itParents);
+        }
       }
     }
 
