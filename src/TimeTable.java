@@ -31,7 +31,7 @@ public class TimeTable implements Comparable<TimeTable> {
     StringBuilder sb = new StringBuilder();
     for (RoomTimeTable rtt : roomTimeTables) {
       sb.append(rtt.toString());
-      sb.append("==============\n");
+      sb.append("\n");
     }
 
     return sb.toString();

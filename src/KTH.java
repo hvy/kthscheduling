@@ -183,14 +183,22 @@ public class KTH {
   
   public void printTimeTable(TimeTable tt) {
     StringBuilder sb = new StringBuilder();
+    int nrSlots = 0;
+    int nrEvents = 0;
     for(RoomTimeTable rtt : tt.getRoomTimeTables()) {
-      sb.append("========================================");    
-      sb.append("Room: " + rtt.getRoom().getName() + " Capacity: " + rtt.getRoom().getCapacity() + "\n");
+      sb.append("============ ");    
+      sb.append("Room: " + rtt.getRoom().getName() + " Capacity: " + rtt.getRoom().getCapacity());
+      sb.append(" ============\n");   
       for (int timeslot = 0; timeslot < RoomTimeTable.NUM_TIMESLOTS; timeslot++) {
         for (int day = 0; day < RoomTimeTable.NUM_DAYS; day++) {
           int eventId = rtt.getEvent(day, timeslot);
+          if(eventId > nrEvents) {
+	    nrEvents = eventId;	
+          }
+	  nrSlots++;
+	  /*
           if(eventId != 0) {
-            Event event = events.get(eventId);
+            //Event event = events.get(eventId);
             sb.append("[ " + event.getCourse().getId() + " " + event.getStudentGroup().getName() + " ");
             if(event.getType() == Event.Type.LECTURE) {
               sb.append(event.getLecturer().getName() + " ]");
@@ -200,11 +208,16 @@ public class KTH {
           } else {
             sb.append("[    -    ]");
           }
+ 	  */
+	  sb.append("[\t" + eventId + "\t]");
         }
         sb.append("\n");
       }    
     }
     System.out.println(sb.toString());
+    System.out.println("Number of slots: " + nrSlots);
+    System.out.println("Number of events: " + nrEvents);
+    System.out.println("Sparseness: " + ((double)nrEvents/(double)nrSlots));
   }
   
 }
