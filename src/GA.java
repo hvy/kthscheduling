@@ -181,7 +181,8 @@ public class GA {
       //population = selection3(population, children);
 
       // sort the population by their fitness
-      population.sortIndividuals(); 
+      // not needed
+      //population.sortIndividuals(); 
       
       numGenerations++;
       System.out.println("#GENERATIONS: " + numGenerations + " BEST FITNESS: " + population.getTopIndividual().getFitness());
@@ -737,12 +738,6 @@ public class GA {
           //j = j >= alias.length ? alias.length  - 1: j;
 
           int pi2 = alias[j];
-          
-          // TODO: this happens alot at the end
-          // needs to be fixed
-          if (pi1 == pi2) {
-            System.out.println("SAME PARENTS!");
-          }
 
           TimeTable t1 = population.getIndividual(pi1);
           TimeTable t2 = population.getIndividual(pi2);
