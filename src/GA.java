@@ -169,8 +169,8 @@ public class GA {
       */
       
       ///*
-      //Population children = breed3(population, MAX_POPULATION_SIZE / 2);
-      Population children = breed4(population, MAX_POPULATION_SIZE / 2);
+      //Population children = breed3(population, MAX_POPULATION_SIZE);
+      Population children = breed4(population, MAX_POPULATION_SIZE);
       //System.out.println("breed done");
 
       population = selection3(population, children);
@@ -182,7 +182,7 @@ public class GA {
 
       // sort the population by their fitness
       // not needed
-      //population.sortIndividuals(); 
+      population.sortIndividuals(); 
       
       numGenerations++;
       System.out.println("#GENERATIONS: " + numGenerations + " BEST FITNESS: " + population.getTopIndividual().getFitness());
@@ -612,6 +612,7 @@ public class GA {
     // even just one parent twice to create one child which is bad
 
     // temp value
+    // less than 0 -> only use roulette
     if (fitnessSum < 0) {
       //System.out.println("USING TOP PARENTS UNIFORMLY");
 
