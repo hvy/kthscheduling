@@ -8,7 +8,6 @@ public class RoomTimeTable {
   // rows are timeslots, columns are days
   private int[][] timeSlots;
 
-  // Holds the constraints for this room
   private Room room;
 
   public RoomTimeTable(Room room) {

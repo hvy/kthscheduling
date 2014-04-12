@@ -1,7 +1,6 @@
 import java.util.*;
 
 public class TimeTable implements Comparable<TimeTable> {
-  // TODO: change to double?
   private int fitness;
 
   // The timetables for each room

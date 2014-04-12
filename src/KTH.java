@@ -11,8 +11,6 @@ public class KTH {
   private Map<Integer, Event> events;
   private ArrayList<Integer> eventIds;
 
-  // TODO: add some maps over the IDs?
-
   public KTH() {
     rooms = new HashMap<Integer, Room>();
     courses = new HashMap<Integer, Course>();
@@ -84,11 +82,7 @@ public class KTH {
         // create lecture events
         for (int i = 0; i < course.getNumLectures(); i++) {
           // find a lecturer for this course
-          // TODO: put lecturers on the course object instead?
-          // TODO: should the choosing of lecturer be randomised?
-          // and there should probably be a soft constraint for
-          // having the same lecturer for a studentgroup/course combination
-          // for each of their lectures
+          // TODO: right now, only one lecturer per course, fixit!
           List<Lecturer> possibleLecturers = new ArrayList<Lecturer>();
           for (Lecturer lecturer : lecturers.values()) {
             if (lecturer.canTeach(course)) {

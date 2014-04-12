@@ -3,8 +3,6 @@ import java.util.ArrayList;
 
 public class StudentGroup {
 	private static int nextId = 0;
-  // store information about what classes this group
-  // attends
 	private int id;
 	private String name;
 	private int size;
